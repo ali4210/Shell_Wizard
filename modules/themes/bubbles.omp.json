@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "final_space": true,
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "path",
+          "style": "diamond",
+          "leading_diamond": "\ue0b6",
+          "trailing_diamond": "\ue0b4",
+          "foreground": "#ffffff",
+          "background": "#8a2be2",
+          "properties": {
+            "style": "folder"
+          },
+          "template": " \uf07b {{ .Path }} "
+        }
+      ]
+    }
+  ]
+}
