@@ -187,77 +187,269 @@ function Set-WindowsTerminalFont {
     }
 }
 
-# --- Module 1: Safety Backup / Rollback Engine ---
+# --- Module 1: Safety Backup / Rollback Engine v2 — Verified, Atomic, Manual-Only ---
+
+function Get-FileHashSafe {
+    param([string]$Path)
+    if (-not (Test-Path -Path $Path)) { return $null }
+    try {
+        return (Get-FileHash -Path $Path -Algorithm SHA256 -ErrorAction Stop).Hash
+    } catch {
+        return $null
+    }
+}
+
+function Copy-ItemAtomic {
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [int]$MaxRetries = 3
+    )
+    $DestDir = Split-Path -Parent $Destination
+    if (-not (Test-Path -Path $DestDir)) {
+        New-Item -Path $DestDir -Type Directory -Force | Out-Null
+    }
+
+    $TempDest = "$Destination.wizard_tmp"
+    $SourceHash = Get-FileHashSafe -Path $Source
+    if (-not $SourceHash) {
+        return @{ Success = $false; Reason = "Source file unreadable or missing: $Source" }
+    }
+
+    for ($Attempt = 1; $Attempt -le $MaxRetries; $Attempt++) {
+        try {
+            Copy-Item -Path $Source -Destination $TempDest -Force -ErrorAction Stop
+            $TempHash = Get-FileHashSafe -Path $TempDest
+
+            if ($TempHash -ne $SourceHash) {
+                Remove-Item -Path $TempDest -Force -ErrorAction SilentlyContinue
+                throw "Hash mismatch after copy (attempt $Attempt)"
+            }
+
+            Move-Item -Path $TempDest -Destination $Destination -Force -ErrorAction Stop
+            return @{ Success = $true; Reason = "OK" }
+
+        } catch {
+            Remove-Item -Path $TempDest -Force -ErrorAction SilentlyContinue
+            if ($Attempt -lt $MaxRetries) {
+                Start-Sleep -Milliseconds (300 * $Attempt)
+            } else {
+                return @{ Success = $false; Reason = $_.Exception.Message }
+            }
+        }
+    }
+}
+
+function New-ShellWizardBackup {
+    param([switch]$Silent)
+
+    if (-not $Silent) {
+        Show-Header
+        Write-Host "CREATING VERIFIED BACKUP SNAPSHOT" -ForegroundColor Yellow
+        Write-Host ""
+    }
+
+    $BackupDir = Join-Path -Path $HOME -ChildPath ".shell_wizard_backups"
+    $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $TargetDir = Join-Path -Path $BackupDir -ChildPath "backup_$TimeStamp"
+    New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
+
+    $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $Targets = @(
+        @{ Label = "PowerShell Profile"; Source = $PROFILE; DestName = "Microsoft.PowerShell_profile.ps1" },
+        @{ Label = "Windows Terminal Settings"; Source = $WTConfigPath; DestName = "settings.json" }
+    )
+
+    $Manifest = @{ CreatedAt = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); Files = @() }
+    $AnyFileBackedUp = $false
+    $AnyFailure = $false
+
+    foreach ($Item in $Targets) {
+        if (-not (Test-Path -Path $Item.Source)) {
+            if (-not $Silent) { Write-Host "  [i] $($Item.Label) — not present, skipped" -ForegroundColor DarkGray }
+            continue
+        }
+
+        $Dest = Join-Path -Path $TargetDir -ChildPath $Item.DestName
+        $Result = Copy-ItemAtomic -Source $Item.Source -Destination $Dest
+
+        if ($Result.Success) {
+            $Hash = Get-FileHashSafe -Path $Dest
+            $Manifest.Files += @{ Name = $Item.DestName; Label = $Item.Label; SHA256 = $Hash }
+            if (-not $Silent) { Write-Host "  [OK] $($Item.Label) backed up and verified" -ForegroundColor Green }
+            $AnyFileBackedUp = $true
+        } else {
+            if (-not $Silent) { Write-Host "  [FAIL] $($Item.Label): $($Result.Reason)" -ForegroundColor Red }
+            $AnyFailure = $true
+        }
+    }
+
+    if (-not $AnyFileBackedUp) {
+        if (-not $Silent) {
+            Write-Host "`n[!] Nothing to back up — no profile or settings found." -ForegroundColor Yellow
+        }
+        Remove-Item -Path $TargetDir -Recurse -Force -ErrorAction SilentlyContinue
+        if (-not $Silent) { Pause-Console }
+        return
+    }
+
+    $ManifestPath = Join-Path -Path $TargetDir -ChildPath "manifest.json"
+    $ManifestTemp = "$ManifestPath.tmp"
+    $Manifest | ConvertTo-Json -Depth 6 | Set-Content -Path $ManifestTemp -Encoding UTF8
+    Move-Item -Path $ManifestTemp -Destination $ManifestPath -Force
+
+    $AllBackups = Get-ChildItem -Path $BackupDir -Directory | Sort-Object CreationTime -Descending
+    if ($AllBackups.Count -gt 10) {
+        $AllBackups | Select-Object -Skip 10 | ForEach-Object {
+            Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    if (-not $Silent) {
+        Write-Host ""
+        if ($AnyFailure) {
+            Write-Host "[PARTIAL] Backup completed with some failures — see above. Snapshot: $TargetDir" -ForegroundColor Yellow
+        } else {
+            Write-Host "[OK] Backup snapshot verified and complete: $TargetDir" -ForegroundColor Green
+        }
+        Pause-Console
+    }
+}
+
+function Test-BackupManifest {
+    param([string]$BackupPath)
+
+    $ManifestPath = Join-Path -Path $BackupPath -ChildPath "manifest.json"
+    if (-not (Test-Path -Path $ManifestPath)) {
+        return @{ Valid = $false; Reason = "No manifest.json — legacy or corrupted snapshot"; Files = @() }
+    }
+
+    try {
+        $Manifest = Get-Content -Path $ManifestPath -Raw | ConvertFrom-Json
+    } catch {
+        return @{ Valid = $false; Reason = "manifest.json is corrupted/unreadable"; Files = @() }
+    }
+
+    $Verified = @()
+    foreach ($File in $Manifest.Files) {
+        $FilePath = Join-Path -Path $BackupPath -ChildPath $File.Name
+        $ActualHash = Get-FileHashSafe -Path $FilePath
+        $Verified += @{ Name = $File.Name; Label = $File.Label; OK = ($ActualHash -eq $File.SHA256) }
+    }
+
+    $AllOK = -not ($Verified | Where-Object { -not $_.OK })
+    return @{ Valid = $AllOK; Reason = "OK"; Files = $Verified }
+}
+
+function Restore-ShellWizardBackup {
+    Show-Header
+    Write-Host "VERIFIED ROLLBACK / RESTORE" -ForegroundColor Yellow
+    Write-Host ""
+
+    $BackupDir = Join-Path -Path $HOME -ChildPath ".shell_wizard_backups"
+    if (-not (Test-Path -Path $BackupDir)) {
+        Write-Host "[!] No backup directory found. Nothing to restore." -ForegroundColor Red
+        Pause-Console
+        return
+    }
+
+    $Backups = Get-ChildItem -Path $BackupDir -Directory | Sort-Object CreationTime -Descending
+    if ($Backups.Count -eq 0) {
+        Write-Host "[!] No backups found." -ForegroundColor Red
+        Pause-Console
+        return
+    }
+
+    Write-Host "Available Backups:" -ForegroundColor Cyan
+    for ($i = 0; $i -lt $Backups.Count; $i++) {
+        $Check = Test-BackupManifest -BackupPath $Backups[$i].FullName
+        $Tag = if ($Check.Valid) { "[VERIFIED]" } else { "[UNVERIFIED]" }
+        $Color = if ($Check.Valid) { "Green" } else { "Yellow" }
+        Write-Host ("  [{0}] {1}  " -f ($i + 1), $Backups[$i].Name) -NoNewline -ForegroundColor White
+        Write-Host $Tag -ForegroundColor $Color
+    }
+    Write-Host ""
+
+    $SelectIndex = Read-Host "Select backup number to restore [1-$($Backups.Count)] (or C to cancel)"
+    if ($SelectIndex -eq "C" -or $SelectIndex -eq "c") { return }
+
+    $Index = [int]$SelectIndex - 1
+    if ($Index -lt 0 -or $Index -ge $Backups.Count) {
+        Write-Host "`n[!] Invalid selection." -ForegroundColor Red
+        Pause-Console
+        return
+    }
+
+    $SelectedBackup = $Backups[$Index].FullName
+    $Check = Test-BackupManifest -BackupPath $SelectedBackup
+
+    if (-not $Check.Valid) {
+        Write-Host "`n[!] WARNING: This backup failed integrity verification ($($Check.Reason))." -ForegroundColor Red
+        $Force = Read-Host "Restore anyway at your own risk? (y/n)"
+        if ($Force -ne 'y' -and $Force -ne 'Y') {
+            Write-Host "[i] Restore cancelled — backup was not trusted." -ForegroundColor Yellow
+            Pause-Console
+            return
+        }
+    }
+
+    # Safety net: silently snapshot current state before overwriting it,
+    # so an unwanted rollback is itself reversible. Fires only here, not on theme changes.
+    Write-Host "`n--> Saving a safety snapshot of your current state before rollback..." -ForegroundColor Cyan
+    New-ShellWizardBackup -Silent
+
+    $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $RestoreMap = @(
+        @{ Label = "PowerShell Profile"; File = "Microsoft.PowerShell_profile.ps1"; Dest = $PROFILE },
+        @{ Label = "Windows Terminal Settings"; File = "settings.json"; Dest = $WTConfigPath }
+    )
+
+    $AnyRestored = $false
+    $AnyFailure = $false
+
+    foreach ($Item in $RestoreMap) {
+        $Source = Join-Path -Path $SelectedBackup -ChildPath $Item.File
+        if (-not (Test-Path -Path $Source)) {
+            Write-Host "  [i] $($Item.Label) — not in this snapshot, skipped" -ForegroundColor DarkGray
+            continue
+        }
+
+        $Result = Copy-ItemAtomic -Source $Source -Destination $Item.Dest
+        if ($Result.Success) {
+            Write-Host "  [OK] $($Item.Label) restored and verified" -ForegroundColor Green
+            $AnyRestored = $true
+        } else {
+            Write-Host "  [FAIL] $($Item.Label): $($Result.Reason)" -ForegroundColor Red
+            $AnyFailure = $true
+        }
+    }
+
+    Write-Host ""
+    if ($AnyFailure) {
+        Write-Host "[PARTIAL] Rollback completed with failures — your pre-rollback state was saved separately." -ForegroundColor Yellow
+    } elseif ($AnyRestored) {
+        Write-Host "[OK] Rollback complete and verified." -ForegroundColor Green
+        Write-Host "[i] Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
+    } else {
+        Write-Host "[!] Nothing was restored — snapshot may be empty." -ForegroundColor Yellow
+    }
+    Pause-Console
+}
+
 function Backup-And-Rollback-Engine {
     Show-Header
     Write-Host "SAFETY AND BACKUP ENGINE (WINDOWS POWERSHELL)" -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "  [1] Create Timestamped Backup of Profile & WT Settings" -ForegroundColor Green
-    Write-Host "  [2] Rollback / Restore PowerShell Profile from Backup" -ForegroundColor Green
+    Write-Host "  [1] Create Verified Backup Snapshot" -ForegroundColor Green
+    Write-Host "  [2] Rollback / Restore from Backup (Integrity-Checked)" -ForegroundColor Green
     Write-Host "  [3] Back to Main Menu" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
     $BackupChoice = Read-Host "Select choice [1-3]"
-    $BackupDir = Join-Path -Path $HOME -ChildPath ".shell_wizard_backups"
-
     switch ($BackupChoice) {
-        "1" {
-            $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-            $TargetDir = Join-Path -Path $BackupDir -ChildPath "backup_$TimeStamp"
-            New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
-
-            if (Test-Path -Path $PROFILE) {
-                Copy-Item -Path $PROFILE -Destination (Join-Path -Path $TargetDir -ChildPath "Microsoft.PowerShell_profile.ps1") -Force
-            }
-            $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-            if (Test-Path -Path $WTConfigPath) {
-                Copy-Item -Path $WTConfigPath -Destination (Join-Path -Path $TargetDir -ChildPath "settings.json") -Force
-            }
-
-            Write-Host ""
-            Write-Host "[OK] Complete environment backup created at: $TargetDir" -ForegroundColor Green
-            Pause-Console
-        }
-        "2" {
-            if (Test-Path -Path $BackupDir) {
-                $Backups = Get-ChildItem -Path $BackupDir | Where-Object { $_.PSIsContainer } | Sort-Object CreationTime -Descending
-                if ($Backups.Count -eq 0) {
-                    Write-Host "`n[!] No backups found inside $BackupDir" -ForegroundColor Red
-                    Pause-Console
-                    return
-                }
-
-                Write-Host "`nAvailable Backups:" -ForegroundColor Yellow
-                for ($i = 0; $i -lt $Backups.Count; $i++) {
-                    Write-Host "  [$($i+1)] $($Backups[$i].Name)" -ForegroundColor Cyan
-                }
-
-                $SelectIndex = Read-Host "`nSelect backup number to restore [1-$($Backups.Count)]"
-                $Index = [int]$SelectIndex - 1
-
-                if ($Index -ge 0 -and $Index -lt $Backups.Count) {
-                    $SelectedBackup = $Backups[$Index].FullName
-                    $BackupProfile = Join-Path -Path $SelectedBackup -ChildPath "Microsoft.PowerShell_profile.ps1"
-                    $BackupWT = Join-Path -Path $SelectedBackup -ChildPath "settings.json"
-
-                    if (Test-Path -Path $BackupProfile) {
-                        Copy-Item -Path $BackupProfile -Destination $PROFILE -Force
-                        Write-Host "[OK] PowerShell profile restored!" -ForegroundColor Green
-                    }
-                    $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
-                    if (Test-Path -Path $BackupWT) {
-                        Copy-Item -Path $BackupWT -Destination $WTConfigPath -Force
-                        Write-Host "[OK] Windows Terminal settings restored!" -ForegroundColor Green
-                    }
-                } else {
-                    Write-Host "`n[!] Invalid selection." -ForegroundColor Red
-                }
-            } else {
-                Write-Host "`n[!] Backup directory does not exist." -ForegroundColor Red
-            }
-            Pause-Console
-        }
+        "1" { New-ShellWizardBackup }
+        "2" { Restore-ShellWizardBackup }
         "3" { return }
         default { Write-Host "Invalid choice!" -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }
