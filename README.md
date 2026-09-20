@@ -131,7 +131,7 @@ See the full [parity table](#parity) further down.
 | Platform | Launcher | Package manager | Status |
 |---|---|---|:-:|
 | 🪟 Windows 10 / 11 | `autorun.bat` | `winget` | ✅ Stable, all modules working |
-| 🐧 Linux (Debian, Ubuntu, Kali, Fedora/RHEL, Arch) | `autorun.sh` | `apt`, `dnf`, `pacman` |  | ✅ Stable, all modules working |
+| 🐧 Linux (Debian, Ubuntu, Kali, Fedora/RHEL, Arch) | `autorun.sh` | `apt`, `dnf`, `pacman` | ✅ Stable, all modules working |
 | 🍎 macOS | `autorun.sh` | `brew` | 🚧 Under active development |
 
 > [!NOTE]
