@@ -1,147 +1,166 @@
 <div align="center">
 
-# 🧙‍♂️ Shell-Wizard Ultimate
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=230&section=header&text=Shell-Wizard%20Ultimate&fontSize=52&fontColor=ffffff&animation=fadeIn&desc=Beautify%2C%20modernize%20and%20safeguard%20your%20terminal&descSize=20&descAlignY=70" alt="Shell-Wizard Ultimate banner" width="100%"/>
 
-### Turn any plain terminal into a fast, beautiful, developer-grade workstation, in minutes.
+<a href="https://github.com/ali4210/Shell_Wizard">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=20&pause=1300&color=58A6FF&center=true&vCenter=true&width=760&lines=Make+your+terminal+your+masterpiece.;Fonts%2C+prompts%2C+themes+and+tools+in+one+menu.;Back+up+first.+Roll+back+in+one+click.;Linux+%7C+macOS+%7C+Windows+%E2%80%94+one+repo." alt="Typing animation" />
+</a>
 
-**Fonts · Prompts · Themes · Plugins · Modern CLI tools · Safe backups**
-*One interactive menu. Linux, macOS, and Windows.*
+<br/>
 
-<br>
+![License](https://img.shields.io/badge/license-MIT-2ea043?style=for-the-badge)
+![Safety](https://img.shields.io/badge/safety-first-e3b341?style=for-the-badge)
+![Themes](https://img.shields.io/badge/themes-11-8250df?style=for-the-badge)
 
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white)
 ![PowerShell](https://img.shields.io/badge/PowerShell-5391FE?style=for-the-badge&logo=powershell&logoColor=white)
-![Platforms](https://img.shields.io/badge/Linux%20%7C%20macOS%20%7C%20Windows-blue?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+![Zsh](https://img.shields.io/badge/Zsh-F15A24?style=for-the-badge&logo=zsh&logoColor=white)
+![Starship](https://img.shields.io/badge/Starship-DD0B78?style=for-the-badge&logo=starship&logoColor=white)
+
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 
 ![Stars](https://img.shields.io/github/stars/ali4210/Shell_Wizard?style=flat-square)
 ![Forks](https://img.shields.io/github/forks/ali4210/Shell_Wizard?style=flat-square)
 ![Last commit](https://img.shields.io/github/last-commit/ali4210/Shell_Wizard?style=flat-square)
 ![Repo size](https://img.shields.io/github/repo-size/ali4210/Shell_Wizard?style=flat-square)
 
-[Quick Start](#-quick-start) · [Features](#-features) · [Modules](#-modules-in-detail) · [Themes](#-theme-gallery-windows) · [FAQ](#-faq) · [Contributing](#-contributing)
+**A cross-platform CLI suite that turns hours of terminal setup into a guided, menu-driven, _reversible_ experience.**
+
+Built for developers, sysadmins, DevOps and security engineers who live in the terminal and want a fast, beautiful, modern setup without hand-editing config files.
+
+<br/>
+
+[**Why**](#why) · [**Features**](#features) · [**Install**](#install) · [**Preview**](#preview) · [**Modules**](#modules) · [**Windows Engine**](#windows) · [**Themes**](#themes) · [**Safety**](#safety) · [**Architecture**](#architecture) · [**FAQ**](#faq) · [**Roadmap**](#roadmap)
 
 </div>
 
 ---
 
+<a id="glance"></a>
+
+## ⚡ At a Glance
+
+<table align="center">
+  <tr>
+    <td align="center"><h3>7</h3><sub>Linux/macOS<br/>modules</sub></td>
+    <td align="center"><h3>2</h3><sub>Native engines<br/>(Bash + PowerShell)</sub></td>
+    <td align="center"><h3>3</h3><sub>Operating systems<br/>(Linux, macOS, Windows)</sub></td>
+    <td align="center"><h3>11</h3><sub>Offline themes<br/>with live preview</sub></td>
+    <td align="center"><h3>15</h3><sub>CLI tools on Windows<br/>(eza, bat, lazygit...)</sub></td>
+    <td align="center"><h3>1</h3><sub>Click to roll back<br/>a snapshot</sub></td>
+  </tr>
+</table>
+
+> [!TIP]
+> **In 30 seconds:** clone the repo, run `./autorun.sh` (Linux/macOS) or right-click `autorun.bat` → *Run as administrator* (Windows), then drive everything from numbered menus. Take a backup snapshot first, and you can always roll back.
+
 > [!IMPORTANT]
-> **First time here? Start with this:**
+> **First time here?** Launch once in first-run mode before anything else:
 >
 > ```bash
 > ./autorun.sh --hard      # or the short form:  ./autorun.sh -f
 > ```
 >
-> Run the launcher in this mode **once, before anything else**. After that, launch normally with `./autorun.sh`.
-> On Windows, run **`autorun.bat`** as Administrator.
+> After that, launch normally with `./autorun.sh`. On Windows, use **`autorun.bat`** as Administrator.
 
 ---
 
-## 📖 Table of Contents
-
-- [Overview](#-overview)
-- [Why Shell-Wizard?](#-why-shell-wizard)
-- [Features](#-features)
-- [Supported Platforms](#-supported-platforms)
-- [Requirements](#-requirements)
-- [Quick Start](#-quick-start)
-- [What You'll See](#-what-youll-see)
-- [How It Works](#-how-it-works)
-- [Modules in Detail](#-modules-in-detail)
-- [Windows PowerShell Engine](#-windows-powershell-engine)
-- [Theme Gallery (Windows)](#-theme-gallery-windows)
-- [Optional: Global Command](#-optional-global-command-shell-wizard)
-- [Repository Structure](#-repository-structure)
-- [Safety and Permissions](#-safety-and-permissions)
-- [Uninstall and Rollback](#-uninstall-and-rollback)
-- [Troubleshooting](#-troubleshooting)
-- [FAQ](#-faq)
-- [Contributing](#-contributing)
-- [Author](#-author)
-- [License](#-license)
-
----
-
-## 🌟 Overview
-
-A great terminal normally takes an afternoon: hunt down a Nerd Font, install Oh My Zsh, clone theme repos, edit `.zshrc` by hand, swap old commands for modern ones, and hope you didn't break your shell config along the way.
-
-**Shell-Wizard Ultimate** does all of it for you from a single menu. It **backs up your current setup first**, then lets you choose exactly what to apply, and lets you **roll back with one click** if you change your mind.
-
-It's built for developers, sysadmins, DevOps engineers, and security analysts who live in the terminal.
-
----
+<a id="why"></a>
 
 ## 🎯 Why Shell-Wizard?
 
-| Without Shell-Wizard | With Shell-Wizard |
-|----------------------|-------------------|
-| Hunt for and install fonts manually | One-click Nerd Font install and cache refresh |
-| Hand-edit `.zshrc`, `.bashrc`, PowerShell profile | Managed, reversible config changes |
-| Break your shell and have no way back | Timestamped backups with one-click restore |
-| Different setup steps on every OS | Same experience on Linux, macOS, and Windows |
-| Plain `ls`, `cat`, `grep` | `eza`, `bat`, `ripgrep`, `fd`, `fzf`, `atuin` |
-| Copy-paste install commands from ten tabs | Everything behind one menu |
+A great terminal normally costs an afternoon:
+
+- 🔤 Hunt down a Nerd Font, unzip it, copy it, refresh the cache, then find where your terminal keeps its font setting
+- 📝 Hand-edit `.zshrc`, `.bashrc` or a PowerShell profile and hope nothing breaks
+- 🎨 Try a prompt theme, restart, dislike it, try another
+- 🧰 Install a dozen modern CLI tools one command at a time
+- 🔁 Repeat everything on every new machine
+
+Most guides leave you copy-pasting commands from ten tabs. Shell-Wizard puts the whole workflow behind **one menu**, with **backups and rollback** so experimenting is safe.
+
+### 🥊 By Hand vs Shell-Wizard
+
+| Situation | 😬 By hand | 🧙 Shell-Wizard |
+|---|---|---|
+| Install a Nerd Font | Download, unzip, copy, `fc-cache`, configure terminal | **One click**, cache refreshed, terminal directions shown (font auto-applied on Windows Terminal) |
+| Try a prompt theme | Edit config, reload, repeat | Pick from a menu; **live preview** before applying on Windows |
+| Change your PowerShell profile | Edit `$PROFILE` and risk clobbering your own lines | Writes only inside a **managed block**, the rest is untouched |
+| Something breaks | Hope you kept a copy | **Timestamped snapshots** with one-click restore (SHA-256 verified on Windows) |
+| Install modern CLI tools | Look up each package name per OS | **One step**: detects `brew` / `apt` / `dnf` / `pacman` / `winget` |
+| Re-run the setup | Duplicate aliases and profile lines | **Idempotent**: already-installed tools and aliases are detected and skipped |
+| "What would this change?" | No way to know | **Dry-Run mode** (Windows) prints exactly what would be written |
+| New machine | Start from scratch | Clone, run, pick your setup |
 
 ---
 
-## ✨ Features
+<a id="features"></a>
+
+## ✨ Feature Tour
 
 | | Feature | Details |
-|---|---------|---------|
-| 🔐 | **Backup and rollback** | Timestamped snapshots of shell configs; one-click restore. Windows backups are SHA-256 verified |
-| 🔤 | **Nerd Font installer** | MesloLGS NF, JetBrainsMono Nerd Font (and CascadiaCode, FiraCode on Windows) with font-cache refresh |
-| ⚡ | **Zsh supercharger** | Oh My Zsh + autosuggestions, syntax highlighting, completions, Powerlevel10k and more |
+|:-:|---|---|
+| 🔐 | **Backup and rollback** | Timestamped snapshots of shell configs with one-click restore. Windows snapshots are SHA-256 verified and integrity-checked before restoring |
+| 🔤 | **Nerd Font installer** | MesloLGS NF and JetBrainsMono Nerd Font (plus CascadiaCode and FiraCode on Windows) with font-cache refresh |
+| ⚡ | **Zsh supercharger** | Oh My Zsh, autosuggestions, syntax highlighting, completions, Powerlevel10k and more |
 | 🛠️ | **CLI modernization** | `eza`, `bat`, `fzf`, `fastfetch`, `fd`, `ripgrep` with smart aliases |
 | 🚀 | **Starship presets** | Gruvbox Rainbow, Tokyo Night, Nerd Font Symbols, Bracketed, Plain |
-| 🌌 | **Next-gen prompts** | Oh My Posh sub-themes, Spaceship presets, Pure, and Atuin history search |
+| 🌌 | **Next-gen prompts** | Oh My Posh sub-themes, Spaceship presets, Pure, Atuin history search |
+| 🎨 | **11 offline themes** | Ship locally for Windows, so theme switching works without internet |
+| 🧪 | **Dry-Run mode** | Preview every change before anything is written *(Windows)* |
 | 🔄 | **Instant reload** | Apply changes without closing your terminal |
-| 🪟 | **Native Windows engine** | Dry-run mode, live theme preview, managed profile block, 15-tool installer |
 | 🌍 | **Global command** | Optional: run `shell-wizard` from any folder |
 
+<details>
+<summary><b>🔍 Which features exist on which platform?</b> (click to expand)</summary>
+
+<br/>
+
+See the full [parity table](#parity) further down.
+
+</details>
+
 ---
+
+<a id="platforms"></a>
 
 ## 🖥️ Supported Platforms
 
 | Platform | Launcher | Package manager | Status |
-|----------|----------|-----------------|--------|
+|---|---|---|:-:|
 | 🪟 Windows 10 / 11 | `autorun.bat` | `winget` | ✅ Stable, all modules working |
 | 🐧 Linux (Debian, Ubuntu, Kali, Fedora/RHEL, Arch) | `autorun.sh` | `apt`, `dnf`, `pacman` | 🚧 Under active development |
 | 🍎 macOS | `autorun.sh` | `brew` | 🚧 Under active development |
 
-> **Project status:** Shell-Wizard is designed as a universal tool for all three platforms. The **Windows PowerShell engine is complete and fully runnable**. The Linux/macOS bash modules are still being finished and stabilized, so expect rough edges there. Bug reports and pull requests are especially welcome.
+> [!NOTE]
+> Shell-Wizard is designed as a universal tool for all three platforms. The **Windows PowerShell engine is complete and fully runnable**. The Linux/macOS bash modules are still being finished and stabilized, so expect rough edges there. Bug reports and pull requests are especially welcome.
 
 ---
 
-## 📋 Requirements
+<a id="install"></a>
 
-| | Linux / macOS | Windows |
-|---|---------------|---------|
-| **Shell** | Bash (Zsh optional, installed by the tool) | Windows PowerShell 5.1+ |
-| **Tools** | `git`, `curl`, `sudo` | `winget` (App Installer) |
+## 🛠️ Installation
+
+### 📋 Requirements
+
+| | 🐧 Linux / 🍎 macOS | 🪟 Windows |
+|---|---|---|
+| **Shell** | Bash (Zsh is optional and installed by the tool) | Windows PowerShell 5.1+ |
+| **Tools** | `git`, `curl`, `sudo` | `winget` (App Installer from the Microsoft Store) |
 | **Privileges** | `sudo` for package installs | Administrator |
-| **Network** | Required for fonts, themes, and packages | Required for fonts, themes, and packages |
+| **Network** | Needed for fonts, themes and packages | Needed for fonts, themes and packages |
 | **Terminal font** | A Nerd Font (the tool can install one) | A Nerd Font (the tool can install and apply one) |
 
----
-
-## 🚀 Quick Start
-
-Shell-Wizard has one launcher per operating system.
-
-| Your OS | Launch with | How |
-|---------|-------------|-----|
-| 🐧 **Linux** / 🍎 **macOS** | **`autorun.sh`** | `./autorun.sh --hard` the first time, then `./autorun.sh` |
-| 🪟 **Windows** | **`autorun.bat`** | Right-click → **Run as administrator** |
-
-### 🐧 Linux / macOS *(🚧 under active development)*
+### 🐧 Linux and macOS *(🚧 under active development)*
 
 ```bash
 # 1. Get the code
 git clone https://github.com/ali4210/Shell_Wizard.git
 cd Shell_Wizard
 
-# 2. First run: use hard mode (long form or short form, both work)
+# 2. First run: use first-run mode (long form or short form, both work)
 chmod +x autorun.sh
 ./autorun.sh --hard
 #   or
@@ -151,7 +170,7 @@ chmod +x autorun.sh
 ./autorun.sh
 ```
 
-If any script complains about permissions, you can also run the sanitizer:
+If a script complains about permissions, run the sanitizer:
 
 ```bash
 bash fix-perms.sh
@@ -165,19 +184,35 @@ cd Shell_Wizard
 ```
 
 1. Right-click **`autorun.bat`** and choose **Run as administrator**.
-   (Alternatively, double-click **`shell-wizard.bat`**, which requests elevation for you and then runs `autorun.bat`.)
-2. In the gateway menu, choose **[3] Windows Host** to launch the PowerShell engine.
-3. Pick a capability from the Windows menu: backup, supercharge, themes, prompts, CLI tools, or fonts.
+   (Or double-click **`shell-wizard.bat`**, which requests elevation and then runs `autorun.bat`.)
+2. In the gateway menu choose **[3] Windows Host** to launch the PowerShell engine.
+3. Pick a capability: backup, supercharge, themes, prompts, CLI tools or fonts.
 
+> [!NOTE]
 > **Why Administrator?** Windows needs elevated rights to install fonts and CLI tools through `winget`.
 
-> **Tip:** Take a backup snapshot (Module 1) before you apply anything.
+### 🌍 Optional: Global command
+
+Not required. `autorun.sh` and `autorun.bat` work on their own. Install the global command only if you want to type `shell-wizard` from any folder.
+
+| Platform | Command | What it does |
+|---|---|---|
+| 🐧 / 🍎 | `bash install.sh` | Makes scripts executable and symlinks `autorun.sh` to `/usr/local/bin/shell-wizard` (uses `sudo`) |
+| 🪟 | `.\install.ps1` | Creates a `shell-wizard.bat` wrapper in `%LOCALAPPDATA%\Microsoft\WindowsApps` and adds a `shell-wizard` function to your PowerShell profile |
+
+On Windows, if your execution policy is `Restricted` or `Undefined`, the installer asks for your consent before changing it to `RemoteSigned` for the **current user only**. Open a new terminal afterwards.
 
 ---
 
-## 👀 What You'll See
+<a id="preview"></a>
 
-**The gateway menu** (both launchers open with an ASCII banner, then this):
+## 🖥️ See It in Action
+
+> [!NOTE]
+> The screens below reproduce the real menu layouts. Timestamps are illustrative.
+
+<details open>
+<summary><b>🚪 The gateway menu</b> (both launchers open with an ASCII banner, then this)</summary>
 
 ```text
 ====================================================================
@@ -191,7 +226,10 @@ Select target operating system environment to customize:
   [4] Exit
 ```
 
-**The Linux/macOS capability menu:**
+</details>
+
+<details>
+<summary><b>🐧 Linux/macOS capability menu</b></summary>
 
 ```text
 Main Capabilities Suite:
@@ -207,9 +245,16 @@ Main Capabilities Suite:
   [9] Exit
 ```
 
-**The Windows capability menu:**
+</details>
+
+<details>
+<summary><b>🪟 Windows capability menu</b></summary>
 
 ```text
+[STATUS] Engine: Oh My Posh | Theme: Jebree | Font: CaskaydiaCove Nerd Font
+[GLOBAL] CLI Command: Enabled [shell-wizard]
+[DRY-RUN] [OFF - LIVE WRITES]
+
 Windows Capability Suite:
 
   [1] Safety & Backup Engine (Backups & Restore Engine)
@@ -224,312 +269,665 @@ Windows Capability Suite:
   [9] Exit
 ```
 
-<!--
-📸 Add screenshots here once you have them, for example:
-![Gateway menu](docs/gateway-menu.png)
-![Theme preview](docs/theme-preview.png)
+</details>
+
+<details>
+<summary><b>🧪 Dry-Run: preview before anything is written</b> (Windows)</summary>
+
+```text
+[DRY-RUN] Preview of Managed Block to be written to $PROFILE:
+# >>> SHELL-WIZARD MANAGED BLOCK >>>
+Import-Module Terminal-Icons -ErrorAction SilentlyContinue
+Import-Module PSReadLine -ErrorAction SilentlyContinue
+Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue
+oh-my-posh init pwsh --config '...\modules\themes\dracula.omp.json' | Invoke-Expression
+# <<< SHELL-WIZARD MANAGED BLOCK <<<
+```
+
+</details>
+
+<details>
+<summary><b>🔐 Restore menu with integrity badges</b> (Windows)</summary>
+
+```text
+VERIFIED ROLLBACK / RESTORE
+
+Available Backups:
+  [1] backup_20260920_135001  [VERIFIED]
+  [2] backup_20260918_204512  [VERIFIED]
+  [3] backup_20260910_091130  [UNVERIFIED]
+
+Select backup number to restore [1-3] (or C to cancel):
+```
+
+</details>
+
+<!-- 📸 Add real screenshots here for maximum impact:
+<p align="center"><img src="assets/screenshot-menu.png" width="80%" alt="Main menu"/></p>
+<p align="center"><img src="assets/screenshot-themes.png" width="80%" alt="Theme preview"/></p>
 -->
 
 ---
+
+<a id="workflow"></a>
 
 ## ⚙️ How It Works
 
 ```mermaid
 flowchart TD
-    A[Launch autorun.sh / autorun.bat] --> B{Choose OS target}
-    B -->|Linux / macOS| C[linux/shell-wizard.sh]
-    B -->|Windows| D[modules/shell-wizard.ps1]
-    C --> M1[1 Backup]
-    C --> M2[2 Fonts]
-    C --> M3[3 Zsh]
-    C --> M4[4 CLI tools]
-    C --> M5[5 Starship]
-    C --> M6[6 Next-gen themes]
-    C --> M7[7 Reload shell]
-    D --> W1[Backup and restore]
-    D --> W2[Supercharge]
-    D --> W3[Themes and prompts]
-    D --> W4[CLI tools and fonts]
-    D --> W5[Global command and dry-run]
+    A(["🚀 autorun.sh / autorun.bat"]) --> B{"Choose OS target"}
+    B -- "Linux / macOS" --> C["🐧 linux/shell-wizard.sh"]
+    B -- "Windows" --> D["🪟 modules/shell-wizard.ps1"]
+
+    C --> M1["1 Backup"]
+    C --> M2["2 Fonts"]
+    C --> M3["3 Zsh"]
+    C --> M4["4 CLI tools"]
+    C --> M5["5 Starship"]
+    C --> M6["6 Next-gen themes"]
+    C --> M7["7 Reload"]
+
+    D --> W1["Backup and restore"]
+    D --> W2["Supercharge"]
+    D --> W3["Themes and prompts"]
+    D --> W4["CLI tools and fonts"]
+    D --> W5["Global CLI and Dry-Run"]
+
+    classDef start fill:#1f6feb,color:#ffffff,stroke:#0b3d91;
+    classDef eng fill:#8250df,color:#ffffff,stroke:#512a97;
+    classDef mod fill:#2ea043,color:#ffffff,stroke:#116329;
+    class A start;
+    class C,D eng;
+    class M1,M2,M3,M4,M5,M6,M7,W1,W2,W3,W4,W5 mod;
 ```
 
 **The recommended flow:**
 
-1. **Back up** your current configuration.
-2. **Install a Nerd Font** so icons and glyphs render correctly.
-3. **Choose your shell setup** (Zsh + Powerlevel10k, Starship, Oh My Posh, etc.).
-4. **Modernize your CLI** with faster replacements.
-5. **Reload** and enjoy. If you don't like the result, **roll back**.
+1. 🔐 **Back up** your current configuration.
+2. 🔤 **Install a Nerd Font** so icons and glyphs render correctly.
+3. 🎨 **Choose your shell setup** (Zsh + Powerlevel10k, Starship, Oh My Posh, and so on).
+4. 🛠️ **Modernize your CLI** with faster replacements.
+5. 🔄 **Reload** and enjoy. Don't like it? **Roll back**.
+
+### 🧭 Recipes
+
+| I want to... | 🐧 Linux / 🍎 macOS | 🪟 Windows |
+|---|---|---|
+| Fix broken icons | `2` → `2` or `3` (install a font) | `6` → pick a font |
+| Get Oh My Zsh + Powerlevel10k | `3` → `1` | n/a |
+| Try a prompt theme with preview | `6` → `1` (Oh My Posh) | `3` → pick a theme → confirm |
+| Use Starship | `5` → `1`, then `2` for presets | `4` → `1` |
+| Install modern CLI tools | `4` → `1` | `5` |
+| Preview changes without writing | n/a | press `D` |
+| Undo my changes | `1` → `2` | `1` → `2` |
+| Start from any folder | `8` (or `bash install.sh`) | `7` (or `.\install.ps1`) |
+| Apply changes without restarting | `7` | `8` |
 
 ---
 
-## 🧩 Modules in Detail
+<a id="modules"></a>
 
-The Linux/macOS engine (`linux/shell-wizard.sh`) dispatches to seven modules. *(This engine is still under active development; the Windows engine, described in the next section, is the fully working one.)*
+## 🧩 Modules in Detail (Linux / macOS)
 
-### 🔐 Module 1: Safety & Backup Engine (`backup-engine.sh`)
+> [!NOTE]
+> The Linux/macOS engine (`linux/shell-wizard.sh`) is still under active development. The Windows engine, described in the [next section](#windows), is the fully working one.
 
-Protects your existing setup before anything changes.
+<details>
+<summary><b>🔐 Module 1 · Safety & Backup Engine</b> (<code>backup-engine.sh</code>)</summary>
 
-- Backs up `.zshrc`, `.bashrc`, `.p10k.zsh`, `.config/starship.toml`, and `.config/fish/config.fish`
-- Stores timestamped snapshots in `~/.shell_wizard_backups/backup_YYYYMMDD_HHMMSS`
-- Interactive restore menu for one-click rollback
-- Menu: create snapshot · list and restore · view backup directory
+<br/>
 
-### 🔤 Module 2: Automated Nerd Font Injector (`font-engine.sh`)
+| Capability | Details |
+|---|---|
+| **Snapshot** | Copies `.zshrc`, `.bashrc`, `.p10k.zsh`, `.config/starship.toml` and `.config/fish/config.fish` into `~/.shell_wizard_backups/backup_YYYYMMDD_HHMMSS` |
+| **Restore** | Interactive list of snapshots with one-click restore |
+| **Auto-backup** | A snapshot is also taken automatically right before Oh My Zsh is installed |
+| **Browse** | View the backup directory from the menu |
+
+</details>
+
+<details>
+<summary><b>🔤 Module 2 · Automated Nerd Font Injector</b> (<code>font-engine.sh</code>)</summary>
+
+<br/>
 
 Fixes broken icons (Git branches, OS logos, Docker symbols) in your prompt.
 
 - Scans the system for installed Nerd Fonts
 - Installs **MesloLGS NF** (recommended for Powerlevel10k) and **JetBrainsMono Nerd Font**
-- Installs to `~/.local/share/fonts` (Linux) or `~/Library/Fonts` (macOS) and refreshes the font cache
-- Shows setup directions for VS Code, macOS Terminal / iTerm2, Windows Terminal, and GNOME/Kali Terminal
+- Installs to `~/.local/share/fonts` (Linux) or `~/Library/Fonts` (macOS), then refreshes the font cache
+- Shows setup directions for VS Code, macOS Terminal / iTerm2, Windows Terminal and GNOME / Kali Terminal
 
-### ⚡ Module 3: ZSH & Oh My Zsh Supercharger (`zsh-engine.sh`)
+</details>
 
-- Installs Oh My Zsh unattended (backs up first)
+<details>
+<summary><b>⚡ Module 3 · ZSH & Oh My Zsh Supercharger</b> (<code>zsh-engine.sh</code>)</summary>
+
+<br/>
+
+- Installs Oh My Zsh unattended
 - Installs plugins: `zsh-autosuggestions`, `zsh-syntax-highlighting`, `zsh-completions`, and enables `sudo` and `autojump`
 - Theme selector: **Powerlevel10k**, **Agnoster**, **Robbyrussell**, **Bira**, **Simple**
 - Launches the interactive `p10k configure` wizard
 
-### 🛠️ Module 4: CLI Modernization & Tooling (`cli-tools.sh`)
+</details>
 
-Installs modern tools through `brew`, `apt`, `dnf`, or `pacman`, and injects smart aliases into `.zshrc` and `.bashrc`.
+<details>
+<summary><b>🛠️ Module 4 · CLI Modernization & Tooling</b> (<code>cli-tools.sh</code>)</summary>
+
+<br/>
+
+Installs modern tools through `brew`, `apt`, `dnf` or `pacman`, then injects smart aliases into `.zshrc` and `.bashrc`.
 
 | Legacy | Replacement | Benefit |
-|--------|-------------|---------|
+|---|---|---|
 | `ls` | `eza` | Icons, colors, tree view |
 | `cat` | `bat` | Syntax highlighting |
 | `find` | `fd` | Faster, friendlier syntax |
 | `grep` | `ripgrep` (`rg`) | Very fast recursive search |
 | `neofetch` | `fastfetch` | Faster system info |
-| history search | `fzf` / `atuin` | Fuzzy and searchable history |
+| history search | `fzf` | Fuzzy finder |
 
-Also available: enable a system dashboard (`fastfetch`) on every new terminal.
+Also available: show a `fastfetch` system dashboard on every new terminal.
 
-### 🚀 Module 5: Starship Cross-Shell Suite (`starship-engine.sh`)
+</details>
 
-Installs [Starship](https://starship.rs) and initializes it in your shell config. Presets: **Gruvbox Rainbow**, **Tokyo Night**, **Nerd Font Symbols**, **Bracketed Segments**, **Plain Minimal**.
+<details>
+<summary><b>🚀 Module 5 · Starship Cross-Shell Suite</b> (<code>starship-engine.sh</code>)</summary>
 
-### 🌌 Module 6: Universal Next-Gen Theme & History (`nextgen-engine.sh`)
+<br/>
+
+Installs [Starship](https://starship.rs) and initializes it in your shell config. Presets: **Gruvbox Rainbow**, **Tokyo Night**, **Nerd Font Symbols**, **Bracketed Segments** and **Plain Minimal**.
+
+</details>
+
+<details>
+<summary><b>🌌 Module 6 · Universal Next-Gen Theme & History</b> (<code>nextgen-engine.sh</code>)</summary>
+
+<br/>
 
 | Option | What you get |
-|--------|--------------|
+|---|---|
 | **Oh My Posh** | Sub-themes: Jebree, Paradox, Agnoster, Bubbles, M365princess |
-| **Spaceship** | Presets: Full-Stack DevOps, Minimalist Fast, Two-Line |
-| **Pure** | Blazing-fast minimalist single-line prompt |
+| **Spaceship** | Presets: Full-Stack DevOps, Minimalist Fast, Two-Line (requires Oh My Zsh, so run Module 3 first) |
+| **Pure** | Fast minimalist single-line prompt |
 | **Atuin** | SQLite-backed shell history with fuzzy search on `Ctrl+R` / `↑` |
 
-### ⚡ Module 7: Instant Shell Reloader (`reload-engine.sh`)
+</details>
 
-Detects your active shell and runs `exec zsh` or `exec bash` so themes, plugins, and aliases apply immediately without closing the terminal.
+<details>
+<summary><b>⚡ Module 7 · Instant Shell Reloader</b> (<code>reload-engine.sh</code>)</summary>
+
+<br/>
+
+Detects your active shell and runs `exec zsh` or `exec bash`, so themes, plugins and aliases apply immediately without closing the terminal.
+
+</details>
 
 ---
+
+<a id="windows"></a>
 
 ## 🪟 Windows PowerShell Engine
 
 `modules/shell-wizard.ps1` is a full orchestrator built for Windows.
 
 | Capability | What it does |
-|------------|--------------|
-| **Managed profile block** | Only edits the section of `$PROFILE` between its own `SHELL-WIZARD MANAGED BLOCK` markers; the rest of your profile is untouched |
-| **Dry-run mode** | Press `D` in the main menu to preview every change before anything is written |
-| **Verified backups** | SHA-256 hashed, atomic copies of your PowerShell profile and Windows Terminal `settings.json`, with a manifest and automatic pruning to the 10 newest snapshots |
-| **Safe restore** | Integrity-checks a snapshot before restoring and saves a safety snapshot of your current state first |
-| **Live theme preview** | See the prompt rendered before you apply it |
-| **Font injection** | Sets the Nerd Font in Windows Terminal `settings.json` automatically (with a backup) |
-| **State tracking** | Remembers active engine, theme, font, and installed tools in `~/.shell_wizard/current.json` |
-| **Idempotent CLI installer** | Detects what is installed and only installs what's missing via `winget` |
-| **Prompt engines** | Oh My Posh, Starship, Posh-Git, or a dependency-free native prompt |
-| **Font Studio** | CascadiaCode, JetBrainsMono, FiraCode, or reset to Cascadia Mono |
+|---|---|
+| 🧱 **Managed profile block** | Only edits the section of `$PROFILE` between its own `SHELL-WIZARD MANAGED BLOCK` markers. The rest of your profile is untouched |
+| 🧪 **Dry-Run mode** | Press `D` in the main menu to preview every change before anything is written |
+| 🔐 **Verified backups** | SHA-256 hashed, atomic copies (with retries) of your PowerShell profile and Windows Terminal `settings.json`, plus a manifest. Only the 10 newest snapshots are kept |
+| 🛟 **Safe restore** | Integrity-checks a snapshot, then saves a safety snapshot of your current state before overwriting anything, so even a rollback is reversible |
+| 👀 **Live theme preview** | See the prompt rendered before you apply it |
+| 🔤 **Font injection** | Sets the Nerd Font in Windows Terminal `settings.json` automatically, after making a `.bak_<timestamp>` copy |
+| 🗂️ **State tracking** | Remembers active engine, theme, font and installed tools in `~/.shell_wizard/current.json` |
+| ♻️ **Idempotent CLI installer** | Detects what is installed and only installs what is missing via `winget` |
+| 🎛️ **Prompt engines** | Oh My Posh, Starship, Posh-Git, or a dependency-free native prompt |
+| 🔠 **Font Studio** | CascadiaCode, JetBrainsMono, FiraCode, or reset to Cascadia Mono |
 
 **The 15 CLI tools installed on Windows:**
 
 `eza` · `bat` · `fastfetch` · `atuin` · `starship` · `ripgrep` · `zoxide` · `fzf` · `lazygit` · `delta` · `fd` · `dust` · `procs` · `bottom` · `gh`
 
+<details>
+<summary><b>🗂️ What the state file looks like</b></summary>
+
+<br/>
+
+```json
+{
+  "ActiveEngine": "Oh My Posh",
+  "ActiveTheme": "Jebree",
+  "ActiveFont": "CaskaydiaCove Nerd Font",
+  "InstalledCLI": ["eza", "bat", "fastfetch", "starship", "ripgrep", "fzf"],
+  "GlobalAlias": "Enabled",
+  "LastUpdated": "2026-09-20 13:50:01"
+}
+```
+
+The status header on every screen reads from this file.
+
+</details>
+
 ---
+
+<a id="themes"></a>
 
 ## 🎨 Theme Gallery (Windows)
 
-Eleven Oh My Posh themes ship locally in `modules/themes/`, so theme switching works **offline** and with a **live preview** before you apply.
+Eleven Oh My Posh themes ship locally in `modules/themes/`, so switching works **offline**, with a **live preview** before you apply.
 
-| Theme | Style | Segments |
-|-------|-------|----------|
-| **Jebree** *(default)* | Blue, red, and yellow powerline | OS icon → folder path → Git branch |
-| **Paradox** | Classic powerline | Path → Git branch |
-| **Agnoster** | Clean, minimal status prompt | User → path |
-| **Bubbles** | Rounded purple pill | Path |
-| **Dracula** | Purple, pink, and green | OS icon → path → Git branch |
-| **Blueish** | Cyan-blue powerline | User → path → Git branch |
-| **Tokyo Night** | Pastel neon dark | Clock → path → Git branch |
-| **Catppuccin Mocha** | Soft pastel | User → path → Git branch |
-| **Gruvbox** | Warm retro | Path → Git branch |
-| **Nord** | Cool arctic blue | Path → Git branch |
-| **Rose Pine** | Vintage soft palette | Path → Git branch |
+| Theme | Palette | Style | Segments |
+|---|---|---|---|
+| **Jebree** *(default)* | ![](https://img.shields.io/badge/_____-0077c2?style=flat-square) ![](https://img.shields.io/badge/_____-ef5350?style=flat-square) ![](https://img.shields.io/badge/_____-ffca28?style=flat-square) | Blue, red and yellow powerline | OS icon → folder path → Git branch |
+| **Paradox** | ![](https://img.shields.io/badge/_____-0077c2?style=flat-square) ![](https://img.shields.io/badge/_____-4e9a06?style=flat-square) | Classic powerline | Path → Git branch |
+| **Agnoster** | ![](https://img.shields.io/badge/_____-d3d7cf?style=flat-square) ![](https://img.shields.io/badge/_____-3465a4?style=flat-square) | Clean status prompt | User → path |
+| **Bubbles** | ![](https://img.shields.io/badge/_____-8a2be2?style=flat-square) | Rounded purple pill | Path |
+| **Dracula** | ![](https://img.shields.io/badge/_____-bd93f9?style=flat-square) ![](https://img.shields.io/badge/_____-ff79c6?style=flat-square) ![](https://img.shields.io/badge/_____-50fa7b?style=flat-square) | Purple, pink and green | OS icon → path → Git branch |
+| **Blueish** | ![](https://img.shields.io/badge/_____-007acc?style=flat-square) ![](https://img.shields.io/badge/_____-0099ff?style=flat-square) ![](https://img.shields.io/badge/_____-00e6e6?style=flat-square) | Cyan-blue powerline | User → path → Git branch |
+| **Tokyo Night** | ![](https://img.shields.io/badge/_____-7aa2f7?style=flat-square) ![](https://img.shields.io/badge/_____-24283b?style=flat-square) ![](https://img.shields.io/badge/_____-bb9af7?style=flat-square) | Pastel neon dark | Clock → path → Git branch |
+| **Catppuccin Mocha** | ![](https://img.shields.io/badge/_____-cba6f7?style=flat-square) ![](https://img.shields.io/badge/_____-89b4fa?style=flat-square) ![](https://img.shields.io/badge/_____-a6e3a1?style=flat-square) | Soft pastel | User → path → Git branch |
+| **Gruvbox** | ![](https://img.shields.io/badge/_____-d79921?style=flat-square) ![](https://img.shields.io/badge/_____-98971a?style=flat-square) | Warm retro | Path → Git branch |
+| **Nord** | ![](https://img.shields.io/badge/_____-88c0d0?style=flat-square) ![](https://img.shields.io/badge/_____-a3be8c?style=flat-square) | Cool arctic blue | Path → Git branch |
+| **Rose Pine** | ![](https://img.shields.io/badge/_____-ebbcba?style=flat-square) ![](https://img.shields.io/badge/_____-31748f?style=flat-square) | Vintage soft palette | Path → Git branch |
 
-> All prompt themes rely on Nerd Font glyphs. Set your terminal font to a Nerd Font or icons will render as empty boxes.
+> [!TIP]
+> All prompt themes rely on Nerd Font glyphs. If you see empty boxes, set your terminal font to a Nerd Font (Font Studio on Windows, or Module 2 on Linux/macOS).
+
+---
+
+<a id="safety"></a>
+
+## 🛡️ Safety and Reversibility
+
+Shell-Wizard edits config files and installs software, so it is built around **undo**.
+
+```mermaid
+flowchart LR
+    A(["🧑 You pick a change"]) --> B{"Dry-Run on?<br/>(Windows)"}
+    B -- "Yes" --> C["📝 Preview only<br/>Nothing is written"]
+    B -- "No" --> D["🧱 Write inside the<br/>managed block"]
+    D --> E["🗂️ Update state file"]
+    E --> F(["✅ Reload shell"])
+    F -. "Not happy?" .-> G["🔐 Restore a snapshot"]
+    G --> H["🛟 Safety snapshot of<br/>current state first"]
+
+    classDef safe fill:#1f6feb,color:#ffffff,stroke:#0b3d91;
+    classDef ok fill:#2ea043,color:#ffffff,stroke:#116329;
+    classDef warn fill:#e3b341,color:#000000,stroke:#9a6700;
+    class C,H safe;
+    class D,E,F ok;
+    class G warn;
+```
+
+| Layer | What it does |
+|---|---|
+| 🔐 **Manual snapshots** | Create a timestamped snapshot any time from Module 1 (Linux/macOS) or **[1]** on Windows. Take one **before** you experiment |
+| 🤖 **Automatic safety copies** | Linux: a snapshot before Oh My Zsh is installed. Windows: a `.bak_<timestamp>` copy of Windows Terminal settings before a font change, and a safety snapshot before any rollback |
+| ✅ **Integrity checks** | Windows snapshots carry a manifest of SHA-256 hashes. Restore lists each snapshot as `[VERIFIED]` or `[UNVERIFIED]` and warns before restoring an untrusted one |
+| 🧱 **Managed block** | On Windows your `$PROFILE` is edited only between the Shell-Wizard markers |
+| 🧪 **Dry-Run** | Windows can print the exact block that would be written, without writing it |
+| ♻️ **Idempotent changes** | Aliases and init lines are added once. Re-running the tool never duplicates them |
+
+<a id="security"></a>
+
+### 🔒 Security Notes
+
+> [!CAUTION]
+> Shell-Wizard uses elevated rights and runs official installers. Read this before you run it.
+
+- 🔑 **`sudo` / Administrator** is used for package installs and to create the global command.
+- 🌐 **Official remote installers are downloaded and run** for Oh My Zsh, Starship, Oh My Posh and Atuin. Review them first if your environment is strict.
+- 🪟 **Windows launchers use `-ExecutionPolicy Bypass`** for the session that runs the engine. `install.ps1` changes the policy only with your consent, and only for the current user.
+- 🧪 Use **Dry-Run** (Windows) or take a **snapshot** first when you are unsure.
 
 ---
 
-## 🌍 Optional: Global Command (`shell-wizard`)
+<a id="config"></a>
 
-Not required. `autorun.sh` and `autorun.bat` work on their own. If you want to start the tool from any folder by typing `shell-wizard`, install the global command once.
+## 🗂️ Configuration and Local Data
 
-**Linux / macOS**
+Shell-Wizard keeps its own data in your home folder and touches only the config files you choose to change.
 
-```bash
-bash install.sh
-```
-
-This makes scripts executable and symlinks `autorun.sh` to `/usr/local/bin/shell-wizard` (uses `sudo`). Then, from any terminal:
-
-```bash
-shell-wizard
-```
-
-**Windows**
-
-```powershell
-.\install.ps1
-```
-
-This creates a `shell-wizard.bat` wrapper in `%LOCALAPPDATA%\Microsoft\WindowsApps` and adds a `shell-wizard` function to your PowerShell profile. If your execution policy is `Restricted` or `Undefined`, the installer asks for your consent before changing it to `RemoteSigned` for the **current user only**. Open a new PowerShell window afterwards.
+| Item | Platform | Purpose |
+|---|:-:|---|
+| `~/.shell_wizard_backups/` | 🐧 🍎 🪟 | Timestamped snapshots. On Windows each has a `manifest.json` with SHA-256 hashes, and only the newest 10 are kept |
+| `~/.shell_wizard/current.json` | 🪟 | State file: active engine, theme, font, installed tools, global command status |
+| `$PROFILE` (managed block) | 🪟 | Prompt and module init lines between the `SHELL-WIZARD MANAGED BLOCK` markers |
+| `settings.json.bak_<timestamp>` | 🪟 | Copy of Windows Terminal settings, made before a font change |
+| `~/.zshrc`, `~/.bashrc` | 🐧 🍎 | Aliases and prompt init lines are added here (once) |
+| `~/.config/starship.toml` | 🐧 🍎 | Active Starship preset |
+| `/usr/local/bin/shell-wizard` | 🐧 🍎 | Global command symlink to `autorun.sh` |
+| `%LOCALAPPDATA%\Microsoft\WindowsApps\shell-wizard.bat` | 🪟 | Global command wrapper for CMD |
 
 ---
+
+<a id="under-the-hood"></a>
+
+## 🔍 What Runs Under the Hood
+
+Nothing is magic. Here is what the friendly menus actually do:
+
+| Feature | What actually runs |
+|---|---|
+| Nerd Font (Linux/macOS) | `curl` the font files → copy to the fonts folder → `fc-cache -fv` |
+| Oh My Zsh | Official unattended install script, then `git clone` for each plugin |
+| Zsh theme | `sed` edits `ZSH_THEME="..."` in `~/.zshrc` |
+| Powerlevel10k | `git clone --depth=1 romkatv/powerlevel10k` |
+| Starship preset | `starship preset <name> -o ~/.config/starship.toml` |
+| Reload shell | `exec zsh` or `exec bash` |
+| Global command (Linux/macOS) | `sudo ln -sf autorun.sh /usr/local/bin/shell-wizard` |
+| Windows supercharge | `winget install JanDeDobbeleer.OhMyPosh` → `oh-my-posh font install CascadiaCode` → `Install-Module Terminal-Icons, PSReadLine` |
+| Windows theme | `oh-my-posh init pwsh --config <theme>.omp.json` written into the managed block |
+| Windows CLI tools | `winget install <id>` for each missing tool |
+| Backup (Windows) | Hash source → copy to temp file → verify hash → move into place (retries up to 3 times) |
+
+---
+
+<a id="architecture"></a>
+
+## 🏗️ Architecture and Engineering Notes
+
+```mermaid
+flowchart TD
+    L1["autorun.sh"] --> BASH["🐧 linux/shell-wizard.sh<br/>Bash engine"]
+    L2["autorun.bat"] --> PS["🪟 modules/shell-wizard.ps1<br/>PowerShell orchestrator"]
+    L3["shell-wizard.bat"] -- "elevates" --> L2
+
+    BASH --> B1["backup-engine"]
+    BASH --> B2["font-engine"]
+    BASH --> B3["zsh-engine"]
+    BASH --> B4["cli-tools"]
+    BASH --> B5["starship-engine"]
+    BASH --> B6["nextgen-engine"]
+    BASH --> B7["reload-engine"]
+
+    PS --> T["🎨 modules/themes/<br/>11 .omp.json files"]
+    PS --> S["🗂️ ~/.shell_wizard/<br/>current.json"]
+
+    I1["install.sh"] -. "symlink" .-> L1
+    I2["install.ps1"] -. "wrapper + profile" .-> L2
+
+    classDef eng fill:#1f6feb,color:#ffffff,stroke:#0b3d91;
+    classDef mod fill:#8250df,color:#ffffff,stroke:#512a97;
+    classDef data fill:#2ea043,color:#ffffff,stroke:#116329;
+    class BASH,PS eng;
+    class B1,B2,B3,B4,B5,B6,B7 mod;
+    class T,S data;
+```
+
+### 🧠 Design decisions worth knowing
+
+| Decision | Why it matters |
+|---|---|
+| 🧩 **Two native engines, one experience** | Bash on Unix-like systems and PowerShell on Windows, with the same menu-driven flow |
+| 🧱 **Managed profile block** | The Windows engine rewrites only its own block, so your hand-written profile lines survive every change |
+| ♻️ **Idempotent by design** | Aliases and init lines are checked before being added, and installed tools are detected before installing |
+| 🔗 **Symlink-safe launchers** | The Bash scripts resolve their real directory even when started through the `/usr/local/bin/shell-wizard` symlink |
+| 📦 **Package manager detection** | Uses `brew`, `apt`, `dnf` or `pacman` on Unix. Older `apt` repos fall back to `exa` and `neofetch` |
+| 🧬 **Atomic, verified copies** | Windows backups are hashed, copied to a temp file, re-hashed, then moved into place, with retries |
+| 🩹 **Self-healing state** | Missing properties in the Windows state file are added automatically instead of crashing |
+| 🔎 **Tool detection beyond `PATH`** | Windows checks `PATH` and the `winget` links folder, and refreshes `PATH` in-process so tools are usable without a restart |
+| 🧪 **Preview before write** | A single Dry-Run flag gates the profile writer, font injector, installers and global-command registration |
+| 🔐 **Consent for policy changes** | `install.ps1` explains the execution-policy change and asks before touching it |
+
+---
+
+<a id="parity"></a>
+
+## ⚖️ Platform Parity
+
+| Feature | 🐧 Linux / 🍎 macOS | 🪟 Windows |
+|---|:-:|:-:|
+| Backup and restore | 🚧 | ✅ (SHA-256 verified) |
+| Nerd Font installer | 🚧 (Meslo, JetBrainsMono) | ✅ (Cascadia, JetBrainsMono, FiraCode, auto-applied) |
+| Oh My Zsh + Powerlevel10k | 🚧 | n/a |
+| Oh My Posh themes | 🚧 (5, downloaded) | ✅ (11, offline, live preview) |
+| Starship | 🚧 (5 presets) | ✅ |
+| Spaceship / Pure / Atuin | 🚧 | Atuin as a CLI tool |
+| Modern CLI tools | 🚧 (6 tools + aliases) | ✅ (15 tools) |
+| Dry-Run mode | ➖ | ✅ |
+| State tracking | ➖ | ✅ |
+| Posh-Git / native prompt | ➖ | ✅ |
+| Global command | 🚧 | ✅ |
+
+> ✅ working · 🚧 under active development · ➖ not available yet · n/a not applicable
+
+---
+
+<a id="structure"></a>
 
 ## 📁 Repository Structure
 
 ```text
 Shell_Wizard/
-├── autorun.sh              # Linux/macOS gateway launcher
-├── autorun.bat             # Windows gateway launcher (requires admin)
-├── shell-wizard.bat        # Windows launcher with auto-elevation
-├── install.sh              # Global CLI installer (Linux/macOS)
-├── install.ps1             # Global CLI installer (Windows)
-├── fix-perms.sh            # Sets +x on all .sh files
-├── banner_wrapper.txt      # ASCII banner for the gateway
-├── README.md
-├── linux/
-│   └── shell-wizard.sh     # Linux/macOS main menu engine
-└── modules/
-    ├── backup-engine.sh    # Module 1: backup and restore
-    ├── font-engine.sh      # Module 2: Nerd Fonts
-    ├── zsh-engine.sh       # Module 3: Zsh / Oh My Zsh / P10K
-    ├── cli-tools.sh        # Module 4: modern CLI tools
-    ├── starship-engine.sh  # Module 5: Starship
-    ├── nextgen-engine.sh   # Module 6: Oh My Posh / Spaceship / Pure / Atuin
-    ├── reload-engine.sh    # Module 7: instant reload
-    ├── shell-wizard.ps1    # Windows PowerShell orchestrator
-    ├── banner.txt          # ASCII banner
-    └── themes/             # 11 Oh My Posh theme files (.omp.json)
+├── 🚀 autorun.sh              # Linux/macOS gateway launcher
+├── 🚀 autorun.bat             # Windows gateway launcher (requires admin)
+├── 🚀 shell-wizard.bat        # Windows launcher with auto-elevation
+├── 📦 install.sh              # Global command installer (Linux/macOS)
+├── 📦 install.ps1             # Global command installer (Windows)
+├── 🔧 fix-perms.sh            # Sets +x on every .sh file
+├── 🖼️ banner_wrapper.txt      # ASCII banner for the gateway
+├── 📖 README.md
+├── 🐧 linux/
+│   └── shell-wizard.sh        # Linux/macOS main menu engine
+└── 🧩 modules/
+    ├── backup-engine.sh       # Module 1: backup and restore
+    ├── font-engine.sh         # Module 2: Nerd Fonts
+    ├── zsh-engine.sh          # Module 3: Zsh / Oh My Zsh / P10K
+    ├── cli-tools.sh           # Module 4: modern CLI tools
+    ├── starship-engine.sh     # Module 5: Starship
+    ├── nextgen-engine.sh      # Module 6: Oh My Posh / Spaceship / Pure / Atuin
+    ├── reload-engine.sh       # Module 7: instant reload
+    ├── 🪟 shell-wizard.ps1    # Windows PowerShell orchestrator
+    ├── banner.txt             # ASCII banner
+    └── 🎨 themes/             # 11 Oh My Posh theme files (.omp.json)
 ```
 
 **Tech stack:** Bash · PowerShell · Batch · JSON (Oh My Posh themes)
 
 ---
 
-## 🔒 Safety and Permissions
+<a id="faq"></a>
 
-Shell-Wizard changes shell configuration files and installs software, so please read this before running it:
+## 🩺 FAQ and Troubleshooting
 
-- **Back up first.** Use Module 1 (Linux/macOS) or the Safety & Backup Engine (Windows) before applying anything.
-- **`sudo` / admin is used** for package installs and for creating the global `/usr/local/bin/shell-wizard` symlink on Linux/macOS.
-- **Remote installers are downloaded and executed** for Oh My Zsh, Starship, Oh My Posh, and Atuin, each from its official source. Review them if you have strict security requirements.
-- **Windows launchers use `-ExecutionPolicy Bypass`** for the session that runs the engine. `install.ps1` only changes the policy with your explicit consent and only for the current user.
-- Use **Dry-Run mode** on Windows to preview changes.
+<details>
+<summary><b>❓ Do I need to install the global command?</b></summary>
 
----
+<br/>
 
-## ♻️ Uninstall and Rollback
+No, it is optional. Launch with `autorun.sh` (Linux/macOS) or `autorun.bat` (Windows). The global command only saves you from `cd`-ing into the folder.
 
-**Undo your changes (recommended):** use the restore option in Module 1 (Linux/macOS) or **[1] Safety & Backup Engine → Rollback** on Windows. Backups live in `~/.shell_wizard_backups/`.
+</details>
 
-**Remove the global command:**
+<details>
+<summary><b>🚦 Why should I run <code>./autorun.sh --hard</code> first?</b></summary>
+
+<br/>
+
+It is the recommended first-run mode. Run it once, then use plain `./autorun.sh` afterwards. `-f` is the short form.
+
+</details>
+
+<details>
+<summary><b>🟠 <code>Permission denied</code> when starting a script</b></summary>
+
+<br/>
+
+Run `./autorun.sh --hard`, or `bash fix-perms.sh`, or `chmod +x autorun.sh`.
+
+</details>
+
+<details>
+<summary><b>🔴 Icons show as boxes or question marks</b></summary>
+
+<br/>
+
+Your terminal is not using a Nerd Font. Install one (Module 2 on Linux/macOS, Font Studio on Windows), then select it in your terminal settings. Module 2 → option 4 lists the exact steps for VS Code, iTerm2, Windows Terminal and GNOME/Kali Terminal. Restart the terminal afterwards.
+
+</details>
+
+<details>
+<summary><b>🟡 <code>shell-wizard</code> is not found after installing the global command</b></summary>
+
+<br/>
+
+Open a **new** terminal window. On Windows, also make sure you ran `install.ps1`, or use option **[7]** in the Windows menu.
+
+</details>
+
+<details>
+<summary><b>🔵 My changes are not visible</b></summary>
+
+<br/>
+
+Reload the shell: Module 7 on Linux/macOS, option **[8]** on Windows, or run `exec zsh` / `exec bash` / `. $PROFILE`.
+
+</details>
+
+<details>
+<summary><b>🪟 "Administrator privileges required" on Windows</b></summary>
+
+<br/>
+
+Right-click `autorun.bat` → **Run as administrator**, or double-click `shell-wizard.bat`, which requests elevation for you.
+
+</details>
+
+<details>
+<summary><b>🪟 My PowerShell theme disappears in new tabs</b></summary>
+
+<br/>
+
+The execution policy is likely blocking your profile. Allow the change in `install.ps1`, or run:
+
+```powershell
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+</details>
+
+<details>
+<summary><b>🪟 <code>winget</code> is not recognized</b></summary>
+
+<br/>
+
+Install **App Installer** from the Microsoft Store, then run Shell-Wizard again.
+
+</details>
+
+<details>
+<summary><b>🪟 The font was not applied in Windows Terminal</b></summary>
+
+<br/>
+
+Automatic font injection edits the standard Windows Terminal settings file. If you use a different terminal host, or a custom install, set the font manually. Restart Windows Terminal after any font change.
+
+</details>
+
+<details>
+<summary><b>🌌 Spaceship says Oh My Zsh is required</b></summary>
+
+<br/>
+
+Run **Module 3** first to install Oh My Zsh, then return to Module 6.
+
+</details>
+
+<details>
+<summary><b>♻️ How do I undo everything?</b></summary>
+
+<br/>
+
+Use the restore option: Module 1 → **[2]** on Linux/macOS, or **[1] Safety & Backup Engine → Rollback** on Windows. Snapshots live in `~/.shell_wizard_backups/`. To remove the global command:
 
 ```bash
-# Linux / macOS
-sudo rm /usr/local/bin/shell-wizard
+sudo rm /usr/local/bin/shell-wizard        # Linux / macOS
 ```
 
 ```powershell
-# Windows: delete the wrapper, then remove the `shell-wizard` function from your $PROFILE
-Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\shell-wizard.bat"
+Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\shell-wizard.bat"   # Windows
 ```
 
-**Remove the tool itself:** delete the `Shell_Wizard` folder. Windows state lives in `~/.shell_wizard/`.
+Then delete the `Shell_Wizard` folder. Windows state lives in `~/.shell_wizard/`.
 
----
+</details>
 
-## 🩺 Troubleshooting
+<details>
+<summary><b>🐧 Does it work on WSL?</b></summary>
 
-| Problem | Fix |
-|---------|-----|
-| `Permission denied` on a script | Run `./autorun.sh --hard`, or `bash fix-perms.sh`, or `chmod +x autorun.sh` |
-| Icons show as `□` or `?` | Install a Nerd Font and select it in your terminal settings (Module 2, option 4 has directions) |
-| `shell-wizard` not found after install | Open a **new** terminal window |
-| Changes not visible | Use Module 7, or run `exec zsh` / `exec bash` |
-| Windows: "Administrator privileges required" | Right-click `autorun.bat` → **Run as administrator**, or use `shell-wizard.bat` |
-| Windows: theme resets on new tab | Allow the execution policy change in `install.ps1`, or run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| Windows: `winget` not found | Install **App Installer** from the Microsoft Store |
-| Restore a previous state | Linux/macOS: Module 1 → option 2. Windows: option 1 → Rollback |
+<br/>
 
----
+Run `autorun.sh` inside your WSL distro as you would on Linux. Terminal font settings still have to be applied on the Windows side.
 
-## ❓ FAQ
+</details>
 
-**Do I need to install the global command?**
-No. It's optional. Launch with `autorun.sh` (Linux/macOS) or `autorun.bat` (Windows).
+<details>
+<summary><b>🏁 Which platform is the most complete?</b></summary>
 
-**Why should I run `./autorun.sh --hard` first?**
-It's the recommended first-run mode. Run it once, then use plain `./autorun.sh` afterwards. `-f` is the short form.
+<br/>
 
-**Will it overwrite my existing config?**
-It takes a backup first and lets you restore it. On Windows, changes go only inside a managed block in your profile.
-
-**Why do I see broken icons?**
-Your terminal isn't using a Nerd Font. Install one with Module 2 (or Font Studio on Windows), then select it in your terminal settings.
-
-**Does it work on WSL?**
-Run `autorun.sh` inside your WSL distro as you would on Linux. Windows Terminal font settings still need to be applied on the Windows side.
-
-**Which platform is the most complete?**
 Windows. The Linux/macOS engine is under active development.
 
+</details>
+
 ---
+
+<a id="roadmap"></a>
+
+## 🧭 Roadmap
+
+- [ ] 🐧 Bring the Linux/macOS engine to full parity with Windows
+- [ ] 🧪 Dry-Run mode and state tracking for Linux/macOS
+- [ ] 📄 Add a `LICENSE` file and tagged GitHub Releases
+- [ ] 🤖 CI with ShellCheck for Bash and PSScriptAnalyzer for PowerShell
+- [ ] 🎨 Ship the 11 themes locally on Linux/macOS as well
+- [ ] 📸 Screenshot and demo GIF gallery
+
+---
+
+<a id="contributing"></a>
 
 ## 🤝 Contributing
 
-Contributions, bug reports, and ideas are welcome, especially for the Linux/macOS engine.
+Contributions, bug reports and ideas are welcome, especially for the Linux/macOS engine.
 
-1. Fork the repository
-2. Create a branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m "Add my feature"`
-4. Push: `git push origin feature/my-feature`
-5. Open a Pull Request
+1. 🍴 **Fork** the repository and create a branch: `feature/your-idea` or `fix/your-bug`
+2. 🛡️ **Keep the safety contract:** config changes must be reversible (snapshot first, managed blocks, Dry-Run support where possible)
+3. ♻️ **Stay idempotent:** running a module twice must never duplicate aliases, profile lines or installs
+4. ⚖️ **Mind parity:** try to keep Linux/macOS and Windows behavior aligned
+5. ✍️ **Use Conventional Commits:** `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+6. 📬 **Open a Pull Request** describing what changed and how you tested it
 
-Found a bug? [Open an issue](https://github.com/ali4210/Shell_Wizard/issues) and include your OS, shell, and the module you were using.
+Found a bug? [Open an issue](https://github.com/ali4210/Shell_Wizard/issues) with your OS, shell and the module you were using.
 
 ---
 
+<a id="author"></a>
+
 ## 👤 Author
 
-**Saleem Ali**, DevOps / Security enthusiast and open-source contributor
+<div align="center">
 
-- GitHub: [github.com/ali4210](https://github.com/ali4210)
-- LinkedIn: [linkedin.com/in/saleem-ali-189719325](https://www.linkedin.com/in/saleem-ali-189719325/)
+### **Saleem Ali**
+*DevOps / DevSecOps enthusiast · AIOps student · builder of practical automation tools*
 
-If this project helped you, please give it a ⭐ on GitHub. It really helps.
+[![GitHub](https://img.shields.io/badge/GitHub-ali4210-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ali4210)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Saleem%20Ali-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/saleem-ali-189719325/)
+
+*If Shell-Wizard saved you an afternoon, consider giving the repo a ⭐*
+
+</div>
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See the `LICENSE` file for details.
-
----
+Distributed under the **MIT License**. See `LICENSE` for details.
 
 <div align="center">
 
-*Make your terminal your masterpiece.* 🧙‍♂️
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer" alt="footer wave" width="100%"/>
 
 </div>
