@@ -54,7 +54,7 @@ select_ohmyposh_subthemes() {
             3) apply_ohmyposh_theme "agnoster"; pause ;;
             4) apply_ohmyposh_theme "bubbles"; pause ;;
             5) apply_ohmyposh_theme "m365princess"; pause ;;
-            6) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done
@@ -143,9 +143,9 @@ manage_nextgen_themes() {
         echo -e "  ${GREEN}[2]${NC} Spaceship Prompt Style Selector ${CYAN}(Full-Stack DevOps, Minimalist, Two-Line Layouts)${NC}"
         echo -e "  ${GREEN}[3]${NC} Pure Minimalist Prompt ${CYAN}(Blazing Fast Single-Line Shell Prompt)${NC}"
         echo -e "  ${GREEN}[4]${NC} Atuin Shell History UI ${CYAN}(SQLite Fuzzy Search via CTRL+R / UP ARROW)${NC}"
-        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-5]: " N_CHOICE
+        read -p "Select choice [0-4]: " N_CHOICE
 
         case $N_CHOICE in
             1) select_ohmyposh_subthemes ;;
@@ -162,7 +162,7 @@ manage_nextgen_themes() {
                 pause
                 ;;
             4) install_atuin_engine ;;
-            5) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

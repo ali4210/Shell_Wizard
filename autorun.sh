@@ -142,9 +142,9 @@ while true; do
     echo -e "  ${GREEN}[1]${NC} 🐧 Linux Workstation ${CYAN}(Debian, Ubuntu, Kali, RHEL, CentOS, Fedora, Arch)${NC}"
     echo -e "  ${GREEN}[2]${NC} 🍎 macOS Terminal ${CYAN}(Brew, Zsh, Starship, P10K Suite)${NC}"
     echo -e "  ${GREEN}[3]${NC} 🪟 Windows Host ${CYAN}(Launch Guidelines for PowerShell / autorun.bat)${NC}"
-    echo -e "  ${GREEN}[4]${NC} Exit"
+    echo -e "  ${GREEN}[0]${NC} Exit"
     echo -e "\n===================================================================="
-    read -p "Select OS context [1-4]: " OS_CHOICE
+    read -p "Select OS context [0-3]: " OS_CHOICE
 
     case $OS_CHOICE in
         1|2)
@@ -172,7 +172,7 @@ while true; do
             read -p "Press [ENTER] to return to OS selection menu..."
             clear
             ;;
-        4)
+        0)
             echo -e "\n${GREEN}Make your terminal your masterpiece! Goodbye!${NC}"
             exit 0
             ;;

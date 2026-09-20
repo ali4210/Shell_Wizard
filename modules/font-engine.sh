@@ -111,16 +111,16 @@ manage_fonts() {
         echo -e "  ${GREEN}[2]${NC} Install MesloLGS NF ${CYAN}(Recommended for Powerlevel10k)${NC}"
         echo -e "  ${GREEN}[3]${NC} Install JetBrainsMono Nerd Font ${CYAN}(Popular Developer Choice)${NC}"
         echo -e "  ${GREEN}[4]${NC} View Terminal Application Setup Directions"
-        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-5]: " F_CHOICE
+        read -p "Select choice [0-4]: " F_CHOICE
 
         case $F_CHOICE in
             1) check_nerd_fonts; pause ;;
             2) install_meslo_font; pause ;;
             3) install_jetbrains_font; pause ;;
             4) show_font_directions ;;
-            5) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

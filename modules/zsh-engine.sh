@@ -69,9 +69,9 @@ switch_themes() {
         echo -e "  ${GREEN}[4]${NC} Bira ${CYAN}(Two-Line Prompt with Host & Path Display)${NC}"
         echo -e "  ${GREEN}[5]${NC} Minimal / Simple ${CYAN}(Clean, High-Speed Prompt)${NC}"
         echo -e "  ${GREEN}[6]${NC} Launch Interactive P10K Wizard ${CYAN}(p10k configure)${NC}"
-        echo -e "  ${GREEN}[7]${NC} Back to Main ZSH Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main ZSH Menu"
         echo -e "\n===================================================================="
-        read -p "Select theme [1-7]: " T_CHOICE
+        read -p "Select theme [0-6]: " T_CHOICE
 
         case $T_CHOICE in
             1)
@@ -90,7 +90,7 @@ switch_themes() {
                 fi
                 pause
                 ;;
-            7) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done
@@ -105,9 +105,9 @@ manage_zsh() {
         echo -e "  ${GREEN}[2]${NC} Instant Theme Selector ${CYAN}(Switch between P10K, Agnoster, Robbyrussell, Bira)${NC}"
         echo -e "  ${GREEN}[3]${NC} Install Essential Plugins Only ${CYAN}(Autosuggestions, Syntax Highlighting, Completions)${NC}"
         echo -e "  ${GREEN}[4]${NC} Launch Interactive P10K Configurator ${CYAN}(p10k configure)${NC}"
-        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-5]: " Z_CHOICE
+        read -p "Select choice [0-4]: " Z_CHOICE
 
         case $Z_CHOICE in
             1)
@@ -126,7 +126,7 @@ manage_zsh() {
                 fi
                 pause
                 ;;
-            5) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

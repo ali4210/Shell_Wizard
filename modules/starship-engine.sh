@@ -68,9 +68,9 @@ switch_starship_presets() {
         echo -e "  ${GREEN}[3]${NC} Nerd Font Symbols ${CYAN}(Icon-Rich Segmented Prompt)${NC}"
         echo -e "  ${GREEN}[4]${NC} Bracketed Segments ${CYAN}(Clean Segmented Box Layout)${NC}"
         echo -e "  ${GREEN}[5]${NC} Plain Minimal ${CYAN}(High Speed, Single-Line Prompt)${NC}"
-        echo -e "  ${GREEN}[6]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select preset choice [1-6]: " P_CHOICE
+        read -p "Select preset choice [0-5]: " P_CHOICE
 
         case $P_CHOICE in
             1) apply_starship_preset "gruvbox"; pause ;;
@@ -78,7 +78,7 @@ switch_starship_presets() {
             3) apply_starship_preset "nerd-font"; pause ;;
             4) apply_starship_preset "bracketed"; pause ;;
             5) apply_starship_preset "plain"; pause ;;
-            6) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done
@@ -90,14 +90,14 @@ manage_starship() {
         echo -e "${YELLOW}${BOLD}[+] Module 5: Starship Cross-Shell Suite${NC}\n"
         echo -e "  ${GREEN}[1]${NC} Install & Initialize Starship Engine ${CYAN}(Works across ZSH, Bash, Fish)${NC}"
         echo -e "  ${GREEN}[2]${NC} Instant Theme Preset Selector ${CYAN}(Gruvbox, Tokyo Night, Nerd Font, Bracketed)${NC}"
-        echo -e "  ${GREEN}[3]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-3]: " S_CHOICE
+        read -p "Select choice [0-2]: " S_CHOICE
 
         case $S_CHOICE in
             1) install_starship; pause ;;
             2) switch_starship_presets ;;
-            3) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

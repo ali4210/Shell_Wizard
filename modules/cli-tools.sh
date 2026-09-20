@@ -90,9 +90,9 @@ manage_cli_tools() {
         echo -e "  ${GREEN}[2]${NC} Install Packages Only ${CYAN}(eza, bat, fzf, fastfetch)${NC}"
         echo -e "  ${GREEN}[3]${NC} Inject Smart Productivity Aliases ${CYAN}(ls -> eza, cat -> bat)${NC}"
         echo -e "  ${GREEN}[4]${NC} Enable System Dashboard on Startup ${CYAN}(fastfetch / neofetch)${NC}"
-        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-5]: " C_CHOICE
+        ead -p "Select choice [0-4]: " C_CHOICE
 
         case $C_CHOICE in
             1)
@@ -114,7 +114,7 @@ manage_cli_tools() {
                 enable_startup_banner
                 pause
                 ;;
-            5) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

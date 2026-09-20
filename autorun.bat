@@ -50,18 +50,18 @@ echo.
 echo    [1] Linux Workstation (Instructions for WSL / Linux VM)
 echo    [2] macOS Terminal (Instructions for macOS Terminal / Zsh)
 echo    [3] Windows Host (Launch PowerShell Engine HERE)
-echo    [4] Exit
+echo    [0] Exit
 echo.
 echo ====================================================================
-set /p "CHOICE=Select OS context [1-4]: "
+set /p "CHOICE=Select OS context [0-3]: "
 
 if "%CHOICE%"=="1" goto opt1
 if "%CHOICE%"=="2" goto opt2
 if "%CHOICE%"=="3" goto opt3
-if "%CHOICE%"=="4" goto opt4
+if "%CHOICE%"=="0" goto opt4
 
 echo.
-echo [!] Invalid choice! Please enter a number from 1 to 4.
+echo [!] Invalid choice! Please enter 0, 1, 2 or 3.
 timeout /t 2 >nul
 goto menu
 

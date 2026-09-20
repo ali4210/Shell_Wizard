@@ -141,9 +141,9 @@ while true; do
     echo -e "  ${GREEN}[6]${NC} Universal Next-Gen Theme & History (Oh My Posh, Spaceship, Pure, Atuin)"
     echo -e "  ${GREEN}[7]${NC} ⚡ 1-Click Apply & Instant Reload Shell (Apply Changes Now)"
     echo -e "  ${GREEN}[8]${NC} 🌐 Enable Global CLI Access (Run 'shell-wizard' from anywhere)"
-    echo -e "  ${GREEN}[9]${NC} Exit"
+    echo -e "  ${GREEN}[0]${NC} Exit"
     echo -e "\n===================================================================="
-    read -p "Enter choice [1-9]: " CHOICE
+    read -p "Enter choice [0-8]: " CHOICE
 
     case $CHOICE in
         1) run_module "backup-engine.sh" "manage_backups"; pause ;;
@@ -154,7 +154,7 @@ while true; do
         6) run_module "nextgen-engine.sh" "manage_nextgen_themes"; pause ;;
         7) run_module "reload-engine.sh" "reload_active_shell"; pause ;;
         8) enable_global_cli ;;
-        9) echo -e "\n${GREEN}Make your terminal your masterpiece! Goodbye!${NC}"; exit 0 ;;
+        0) echo -e "\n${GREEN}Make your terminal your masterpiece! Goodbye!${NC}"; exit 0 ;;
         *) echo -e "\n${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
 done

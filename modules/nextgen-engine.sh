@@ -91,15 +91,15 @@ select_ohmyposh_subthemes() {
             printf "  ${GREEN}[%2d]${NC} %-17s ${CYAN}(%s)${NC}\n" "$i" "$LABEL" "$DESC"
             i=$((i+1))
         done
-        printf "  ${GREEN}[%2d]${NC} Back to Next-Gen Menu\n" "$((COUNT+1))"
+        printf "  ${GREEN}[ 0]${NC} Back to Next-Gen Menu\n"
         echo -e "\n===================================================================="
-        read -p "Select sub-theme [1-$((COUNT+1))]: " OMP_CHOICE
+        read -p "Select sub-theme [0-${COUNT}]: " OMP_CHOICE
 
         if [[ "$OMP_CHOICE" =~ ^[0-9]+$ ]] && (( OMP_CHOICE >= 1 && OMP_CHOICE <= COUNT )); then
             IFS='|' read -r NAME LABEL DESC <<< "${OMP_THEMES[$((OMP_CHOICE-1))]}"
             apply_ohmyposh_theme "$NAME"
             pause
-        elif [[ "$OMP_CHOICE" =~ ^[0-9]+$ ]] && (( OMP_CHOICE == COUNT+1 )); then
+        elif [[ "$OMP_CHOICE" == "0" ]]; then
             break
         else
             echo -e "${RED}Invalid selection!${NC}"; sleep 1
@@ -149,9 +149,9 @@ select_spaceship_subpresets() {
         echo -e "  ${GREEN}[1]${NC} Full-Stack DevOps Preset ${CYAN}(Git, Docker, K8s, Node, Python, AWS)${NC}"
         echo -e "  ${GREEN}[2]${NC} Minimalist Fast Preset ${CYAN}(Directory, Git Status, Execution Time)${NC}"
         echo -e "  ${GREEN}[3]${NC} Two-Line Cyberpunk Preset ${CYAN}(Prompt input on dedicated newline)${NC}"
-        echo -e "  ${GREEN}[4]${NC} Back to Next-Gen Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Next-Gen Menu"
         echo -e "\n===================================================================="
-        read -p "Select preset [1-4]: " SPACE_CHOICE
+        read -p "Select preset [0-3]: " SPACE_CHOICE
 
         case $SPACE_CHOICE in
             1)
@@ -169,7 +169,7 @@ select_spaceship_subpresets() {
                 echo -e "${GREEN}[✔] Two-Line Cyberpunk Spaceship Preset Applied!${NC}"
                 pause
                 ;;
-            4) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done
@@ -206,9 +206,9 @@ manage_nextgen_themes() {
         echo -e "  ${GREEN}[2]${NC} Spaceship Prompt Style Selector ${CYAN}(Full-Stack DevOps, Minimalist, Two-Line Layouts)${NC}"
         echo -e "  ${GREEN}[3]${NC} Pure Minimalist Prompt ${CYAN}(Blazing Fast Single-Line Shell Prompt)${NC}"
         echo -e "  ${GREEN}[4]${NC} Atuin Shell History UI ${CYAN}(SQLite Fuzzy Search via CTRL+R / UP ARROW)${NC}"
-        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-5]: " N_CHOICE
+        read -p "Select choice [0-4]: " N_CHOICE
 
         case $N_CHOICE in
             1) select_ohmyposh_subthemes ;;
@@ -226,7 +226,7 @@ manage_nextgen_themes() {
                 pause
                 ;;
             4) install_atuin_engine ;;
-            5) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done

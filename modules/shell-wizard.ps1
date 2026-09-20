@@ -370,8 +370,8 @@ function Restore-ShellWizardBackup {
     }
     Write-Host ""
 
-    $SelectIndex = Read-Host "Select backup number to restore [1-$($Backups.Count)] (or C to cancel)"
-    if ($SelectIndex -eq "C" -or $SelectIndex -eq "c") { return }
+    $SelectIndex = Read-Host "Select backup number to restore [1-$($Backups.Count)] (or 0 to cancel)"
+    if ($SelectIndex -eq "0" -or $SelectIndex -eq "C" -or $SelectIndex -eq "c") { return }
 
     $ParsedIndex = 0
     if (-not [int]::TryParse($SelectIndex, [ref]$ParsedIndex)) {
@@ -448,15 +448,15 @@ function Backup-And-Rollback-Engine {
     Write-Host ""
     Write-Host "  [1] Create Verified Backup Snapshot" -ForegroundColor Green
     Write-Host "  [2] Rollback / Restore from Backup (Integrity-Checked)" -ForegroundColor Green
-    Write-Host "  [3] Back to Main Menu" -ForegroundColor Green
+    Write-Host "  [0] Back to Main Menu" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
-    $BackupChoice = Read-Host "Select choice [1-3]"
+    $BackupChoice = Read-Host "Select choice [0-2]"
     switch ($BackupChoice) {
         "1" { New-ShellWizardBackup }
         "2" { Restore-ShellWizardBackup }
-        "3" { return }
+        "0" { return }
         default { Write-Host "Invalid choice!" -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }
 }
@@ -517,11 +517,11 @@ function Switch-PowerShellThemes {
     Write-Host "  [9] Gruvbox (Warm Retro Palette)" -ForegroundColor Green
     Write-Host " [10] Nord (Cool Arctic Blue Palette)" -ForegroundColor Green
     Write-Host " [11] Rose Pine (Vintage Soft Palette)" -ForegroundColor Green
-    Write-Host " [12] Back to Main Menu" -ForegroundColor Green
+    Write-Host "  [0] Back to Main Menu" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
-    $ThemeChoice = Read-Host "Select theme choice [1-12]"
+    $ThemeChoice = Read-Host "Select theme choice [0-11]"
     $ThemeFileName = ""
     $ThemeName = ""
 
@@ -537,7 +537,7 @@ function Switch-PowerShellThemes {
         "9"  { $ThemeFileName = "gruvbox.omp.json"; $ThemeName = "Gruvbox" }
         "10" { $ThemeFileName = "nord.omp.json"; $ThemeName = "Nord" }
         "11" { $ThemeFileName = "rosepine.omp.json"; $ThemeName = "Rose Pine" }
-        "12" { return }
+        "0" { return }
         default { Write-Host "Invalid selection!" -ForegroundColor Red; Start-Sleep -Seconds 1; return }
     }
 
@@ -591,11 +591,11 @@ function Standalone-Prompt-Engine {
     Write-Host "  [1] Starship Prompt Engine (Rust-Powered 0ms Speed, Multi-Shell)" -ForegroundColor Green
     Write-Host "  [2] Posh-Git Engine (Lightweight Native PowerShell Git Prompt)" -ForegroundColor Green
     Write-Host "  [3] Pure Native PowerShell Prompt (0% Dependencies, Instant Speed)" -ForegroundColor Green
-    Write-Host "  [4] Back to Main Menu" -ForegroundColor Green
+    Write-Host "  [0] Back to Main Menu" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
-    $PromptChoice = Read-Host "Select choice [1-4]"
+    $PromptChoice = Read-Host "Select choice [0-3]"
 
     switch ($PromptChoice) {
         "1" {
@@ -647,7 +647,7 @@ function Standalone-Prompt-Engine {
             Write-Host "[OK] Native Pure PowerShell Prompt applied!" -ForegroundColor Green
             Pause-Console
         }
-        "4" { return }
+        "0" { return }
         default { Write-Host "Invalid choice!" -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }
 }
@@ -731,11 +731,11 @@ function Font-Studio-Engine {
     Write-Host "  [2] JetBrainsMono Nerd Font (Developer Favorite - Fixed String)" -ForegroundColor Green
     Write-Host "  [3] FiraCode Nerd Font (Famous Ligatures Standard)" -ForegroundColor Green
     Write-Host "  [4] Reset Terminal Font to Standard Default (Cascadia Mono)" -ForegroundColor Yellow
-    Write-Host "  [5] Back to Main Menu" -ForegroundColor Green
+    Write-Host "  [0] Back to Main Menu" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
-    $FontChoice = Read-Host "Select choice [1-5]"
+    $FontChoice = Read-Host "Select choice [0-4]"
 
     switch ($FontChoice) {
         "1" {
@@ -773,7 +773,7 @@ function Font-Studio-Engine {
             Set-WindowsTerminalFont -ExactFontName "Cascadia Mono"
             Pause-Console
         }
-        "5" { return }
+        "0" { return }
         default { Write-Host "Invalid choice!" -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }
 }
@@ -825,11 +825,11 @@ while ($true) {
     Write-Host "  [7] Enable Global CLI Access ('shell-wizard' command anywhere)" -ForegroundColor Yellow
     Write-Host "  [8] Reload Active PowerShell Profile" -ForegroundColor Yellow
     Write-Host "  [D] Toggle Dry-Run Mode [ON/OFF]" -ForegroundColor Cyan
-    Write-Host "  [9] Exit" -ForegroundColor Green
+    Write-Host "  [0] Exit" -ForegroundColor Green
     Write-Host ""
     Write-Host "====================================================================" -ForegroundColor Cyan
 
-    $Choice = Read-Host "Select choice [1-9 or D]"
+    $Choice = Read-Host "Select choice [0-8 or D]"
 
     switch ($Choice) {
         "1" { Backup-And-Rollback-Engine }
@@ -855,7 +855,7 @@ while ($true) {
             Write-Host "`n[DRY-RUN] Mode $StatusText" -ForegroundColor Yellow
             Start-Sleep -Seconds 1
         }
-        "9" { exit 0 }
+        "0" { exit 0 }
         default { Write-Host "Invalid selection!" -ForegroundColor Red; Start-Sleep -Seconds 1 }
     }
 }

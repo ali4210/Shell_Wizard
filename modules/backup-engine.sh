@@ -68,10 +68,10 @@ restore_backup() {
         local FOLDER_NAME=$(basename "${BACKUPS[$i]}")
         echo -e "  ${GREEN}[$((i+1))]${NC} ${FOLDER_NAME}"
     done
-    echo -e "  ${GREEN}[$(( ${#BACKUPS[@]} + 1 ))]${NC} Cancel"
+    echo -e "  ${GREEN}[0]${NC} Cancel"
     echo ""
 
-    read -p "Select backup choice [1-$(( ${#BACKUPS[@]} + 1 ))]: " CHOICE
+    read -p "Select backup choice [0-${#BACKUPS[@]}]: " CHOICE
 
     if [[ "$CHOICE" -ge 1 ]] && [[ "$CHOICE" -le "${#BACKUPS[@]}" ]]; then
         local SELECTED_BACKUP="${BACKUPS[$((CHOICE-1))]}"
@@ -101,9 +101,9 @@ manage_backups() {
         echo -e "  ${GREEN}[1]${NC} Create Fresh Safety Snapshot Now"
         echo -e "  ${GREEN}[2]${NC} List & Restore Previous Backup Snapshot ${CYAN}(1-Click Rollback)${NC}"
         echo -e "  ${GREEN}[3]${NC} View Backup Storage Directory (${BACKUP_DIR})"
-        echo -e "  ${GREEN}[4]${NC} Back to Main Menu"
+        echo -e "  ${GREEN}[0]${NC} Back to Main Menu"
         echo -e "\n===================================================================="
-        read -p "Select choice [1-4]: " B_CHOICE
+        read -p "Select choice [0-3]: " B_CHOICE
 
         case $B_CHOICE in
             1)
@@ -123,7 +123,7 @@ manage_backups() {
                 fi
                 pause
                 ;;
-            4) break ;;
+            0) break ;;
             *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
         esac
     done
