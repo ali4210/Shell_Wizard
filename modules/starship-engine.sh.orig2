@@ -32,37 +32,30 @@ install_starship() {
 
 # --- Starship Theme Preset Switcher ---
 apply_starship_preset() {
-    local PRESET_NAME="$1" NAME tmp err
+    local PRESET_NAME="$1"
     mkdir -p "$STARSHIP_CONFIG_DIR"
 
-    if ! command -v starship &>/dev/null; then
-        echo -e "${RED}[!] Starship is not installed. Run option 1 first.${NC}"
-        return 1
-    fi
-
+    echo -e "${CYAN}--> Fetching and applying Starship preset '${PRESET_NAME}'...${NC}"
     case $PRESET_NAME in
-        "nerd-font")   NAME="nerd-font-symbols" ;;
-        "gruvbox")     NAME="gruvbox-rainbow" ;;
-        "tokyo-night") NAME="tokyo-night" ;;
-        "bracketed")   NAME="bracketed-segments" ;;
-        "plain")       NAME="plain-text-symbols" ;;
-        *) echo -e "${RED}[!] Unknown preset '${PRESET_NAME}'.${NC}"; return 1 ;;
+        "nerd-font")
+            starship preset nerd-font-symbols -o "$STARSHIP_FILE"
+            ;;
+        "gruvbox")
+            starship preset gruvbox-rainbow -o "$STARSHIP_FILE"
+            ;;
+        "tokyo-night")
+            curl -sSL "https://raw.githubusercontent.com/starship/starship/main/docs/public/presets/toml/tokyo-night.toml" -o "$STARSHIP_FILE"
+            ;;
+        "bracketed")
+            starship preset bracketed-segments -o "$STARSHIP_FILE"
+            ;;
+        "plain")
+            starship preset plain-text -o "$STARSHIP_FILE"
+            ;;
     esac
 
-    echo -e "${CYAN}--> Applying Starship preset '${PRESET_NAME}'...${NC}"
-    tmp="$(mktemp)"
-    if err=$(starship preset "$NAME" -o "$tmp" --force 2>&1) && [[ -s "$tmp" ]]; then
-        [[ -f "$STARSHIP_FILE" ]] && cp "$STARSHIP_FILE" "${STARSHIP_FILE}.bak"
-        cp "$tmp" "$STARSHIP_FILE"
-        rm -f "$tmp"
-        echo -e "${GREEN}[✔] Preset '${PRESET_NAME}' applied to ~/.config/starship.toml!${NC}"
-        echo -e "${CYAN}[💡] It loads on your next prompt. If not, run ${BOLD}exec zsh${NC}${CYAN}.${NC}"
-    else
-        rm -f "$tmp"
-        echo -e "${RED}[!] Could not apply '${PRESET_NAME}'. Your old config was kept.${NC}"
-        echo -e "${YELLOW}    ${err}${NC}"
-        return 1
-    fi
+    echo -e "${GREEN}[✔] Starship preset '${PRESET_NAME}' applied to ~/.config/starship.toml!${NC}"
+    echo -e "${CYAN}[💡] Run ${BOLD}exec zsh${NC}${CYAN} (or ${BOLD}exec bash${NC}${CYAN}) to load your new Starship theme.${NC}"
 }
 
 switch_starship_presets() {

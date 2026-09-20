@@ -22,41 +22,139 @@ install_oh_my_zsh() {
     fi
 }
 
+# --- Helper: add plugins to plugins=(...) without removing existing ones ---
+_enable_zsh_plugins() {
+    local RC="${HOME}/.zshrc" p
+    [[ -f "$RC" ]] || return 1
+    grep -q '^plugins=(' "$RC" || echo 'plugins=(git)' >> "$RC"
+
+    # Collect existing plugins (single-line or multi-line block), drop syntax-highlighting
+    local block existing
+    block=$(awk '/^plugins=\(/{f=1} f{print} f&&/\)/{exit}' "$RC")
+    existing=$(echo "$block" | sed -e 's/^plugins=(//' -e 's/)//' | tr -s ' \t\n' ' ')
+    local -a list=()
+    for p in $existing zsh-syntax-highlighting; do
+        [[ "$p" == "zsh-syntax-highlighting" ]] && continue
+        list+=("$p")
+    done
+    for p in "$@"; do
+        [[ " ${list[*]} " == *" $p "* ]] || list+=("$p")
+    done
+    list+=("zsh-syntax-highlighting")
+
+    local NEW="plugins=(${list[*]})"
+    local TMP; TMP=$(mktemp)
+    awk -v new="$NEW" '
+        /^plugins=\(/ && !done { print new; skip=1; done=1; if ($0 ~ /\)/) skip=0; next }
+        skip { if ($0 ~ /\)/) skip=0; next }
+        { print }' "$RC" > "$TMP" && cp "$TMP" "$RC"
+    rm -f "$TMP"
+    grep -qF "$NEW" "$RC"
+}
+
 # --- Install Productivity Plugins ---
 install_zsh_plugins() {
     install_oh_my_zsh
+    local RC="${HOME}/.zshrc" name url dir failed=0
+    touch "$RC"
 
-    echo -e "\n${GREEN}--> Installing zsh-autosuggestions...${NC}"
-    [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]] && \
-    git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
+    if ! command -v git &>/dev/null; then
+        echo -e "${RED}[!] git is required. Install it first (e.g. sudo apt install git).${NC}"
+        return 1
+    fi
 
-    echo -e "\n${GREEN}--> Installing zsh-syntax-highlighting...${NC}"
-    [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]] && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
+    local PLUGINS=(
+        "zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions"
+        "zsh-completions|https://github.com/zsh-users/zsh-completions"
+        "zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting.git"
+    )
 
-    echo -e "\n${GREEN}--> Installing zsh-completions...${NC}"
-    [[ ! -d "${ZSH_CUSTOM}/plugins/zsh-completions" ]] && \
-    git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM}/plugins/zsh-completions"
+    for entry in "${PLUGINS[@]}"; do
+        IFS='|' read -r name url <<< "$entry"
+        dir="${ZSH_CUSTOM}/plugins/${name}"
+        if [[ -f "${dir}/${name}.plugin.zsh" ]]; then
+            echo -e "${GREEN}[✔] ${name} already installed.${NC}"
+            continue
+        fi
+        echo -e "${CYAN}--> Installing ${name}...${NC}"
+        rm -rf "$dir"
+        if git clone --depth=1 "$url" "$dir" &>/dev/null && [[ -f "${dir}/${name}.plugin.zsh" ]]; then
+            echo -e "${GREEN}[✔] ${name} installed.${NC}"
+        else
+            echo -e "${RED}[!] Failed to install ${name}. Check your internet connection.${NC}"
+            rm -rf "$dir"
+            failed=1
+        fi
+    done
 
-    if [[ -f "${HOME}/.zshrc" ]]; then
-        echo -e "\n${CYAN}--> Enabling plugins inside ~/.zshrc...${NC}"
-        sed -i 's/plugins=(.*)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions sudo autojump)/g' "${HOME}/.zshrc" 2>/dev/null || true
-        echo -e "${GREEN}[✔] Extended plugin suite enabled in ~/.zshrc!${NC}"
+    echo -e "\n${CYAN}--> Enabling plugins inside ~/.zshrc...${NC}"
+    if _enable_zsh_plugins zsh-autosuggestions zsh-completions && (( failed == 0 )); then
+        echo -e "${GREEN}[✔] Plugins installed and enabled (your other plugins were kept).${NC}"
+        echo -e "${CYAN}[💡] Run ${BOLD}exec zsh${NC}${CYAN} or open a new tab to load them.${NC}"
+    else
+        echo -e "${RED}[!] Plugin setup incomplete. See the messages above.${NC}"
+        return 1
     fi
 }
 
 # --- Helper: Apply Specific ZSH Theme ---
 set_zsh_theme() {
     local THEME_NAME="$1"
+    local RC="${HOME}/.zshrc"
     install_oh_my_zsh
-
-    if [[ -f "${HOME}/.zshrc" ]]; then
-        echo -e "${CYAN}--> Setting ZSH_THEME=\"${THEME_NAME}\" in ~/.zshrc...${NC}"
-        sed -i "s/ZSH_THEME=\".*\"/ZSH_THEME=\"${THEME_NAME}\"/g" "${HOME}/.zshrc"
+    if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
+        echo -e "${RED}[!] Oh My Zsh is not installed, cannot set a theme.${NC}"
+        return 1
+    fi
+    touch "$RC"
+    echo -e "${CYAN}--> Setting ZSH_THEME=\"${THEME_NAME}\" in ~/.zshrc...${NC}"
+    if grep -q '^ZSH_THEME=' "$RC"; then
+        sed -i "s|^ZSH_THEME=.*|ZSH_THEME=\"${THEME_NAME}\"|" "$RC"
+    else
+        echo "ZSH_THEME=\"${THEME_NAME}\"" >> "$RC"
+    fi
+    if grep -qxF "ZSH_THEME=\"${THEME_NAME}\"" "$RC"; then
         echo -e "${GREEN}[✔] Theme changed to '${THEME_NAME}'!${NC}"
         echo -e "${CYAN}[💡] Run ${BOLD}exec zsh${NC}${CYAN} to see your new theme in action.${NC}"
+    else
+        echo -e "${RED}[!] Failed to set the theme in ~/.zshrc${NC}"
+        return 1
     fi
 }
+
+# --- Helper: run p10k configure safely ---
+run_p10k_configure() {
+    install_p10k || return 1
+    zsh -ic 'p10k configure' || true
+}
+
+install_p10k() {
+    local DIR="${ZSH_CUSTOM}/themes/powerlevel10k"
+    local T="${DIR}/powerlevel10k.zsh-theme"
+    for tool in git zsh curl; do
+        if ! command -v "$tool" &>/dev/null; then
+            echo -e "${RED}[!] '$tool' is required. Install it first (e.g. sudo apt install $tool).${NC}"
+            return 1
+        fi
+    done
+    install_oh_my_zsh
+    if [[ ! -f "$T" ]]; then
+        echo -e "${CYAN}--> Installing Powerlevel10k...${NC}"
+        rm -rf "$DIR"
+        if ! git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$DIR"; then
+            echo -e "${RED}[!] Download failed. Check your internet connection and try again.${NC}"
+            rm -rf "$DIR"
+            return 1
+        fi
+    fi
+    if [[ ! -f "$T" ]]; then
+        echo -e "${RED}[!] Powerlevel10k files are missing after install.${NC}"
+        return 1
+    fi
+    set_zsh_theme "powerlevel10k/powerlevel10k" || return 1
+    echo -e "${GREEN}[✔] Powerlevel10k installed and selected.${NC}"
+}
+
 
 # --- Theme Selector Engine ---
 switch_themes() {
@@ -75,9 +173,7 @@ switch_themes() {
 
         case $T_CHOICE in
             1)
-                [[ ! -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]] && \
-                git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
-                set_zsh_theme "powerlevel10k/powerlevel10k"
+                install_p10k
                 pause
                 ;;
             2) set_zsh_theme "agnoster"; pause ;;
@@ -85,9 +181,7 @@ switch_themes() {
             4) set_zsh_theme "bira"; pause ;;
             5) set_zsh_theme "simple"; pause ;;
             6)
-                if command -v zsh &>/dev/null; then
-                    zsh -c "source ~/.zshrc 2>/dev/null; p10k configure" || true
-                fi
+                run_p10k_configure
                 pause
                 ;;
             0) break ;;
@@ -112,18 +206,18 @@ manage_zsh() {
         case $Z_CHOICE in
             1)
                 install_zsh_plugins
-                [[ ! -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]] && \
-                git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
-                set_zsh_theme "powerlevel10k/powerlevel10k"
-                echo -e "\n${GREEN}${BOLD}[✔] ZSH SUPERCHARGE COMPLETE!${NC}"
+                if install_p10k; then
+                    echo -e "\n${GREEN}${BOLD}[✔] ZSH SUPERCHARGE COMPLETE!${NC}"
+                    echo -e "${CYAN}[💡] Run ${BOLD}exec zsh${NC}${CYAN} (or open a new tab). The P10K setup wizard starts automatically.${NC}"
+                else
+                    echo -e "\n${RED}${BOLD}[!] Supercharge did not complete. See the errors above.${NC}"
+                fi
                 pause
                 ;;
             2) switch_themes ;;
             3) install_zsh_plugins; pause ;;
             4)
-                if command -v zsh &>/dev/null; then
-                    zsh -c "source ~/.zshrc 2>/dev/null; p10k configure" || true
-                fi
+                run_p10k_configure
                 pause
                 ;;
             0) break ;;

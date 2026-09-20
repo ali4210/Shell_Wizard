@@ -47,6 +47,7 @@ apply_ohmyposh_theme() {
         return 1
     fi
 
+    _clear_prompt_engines
     # Disable conflicting OMZ ZSH_THEME
     if [[ -f "${HOME}/.zshrc" ]]; then
         _sed_i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
@@ -214,6 +215,7 @@ manage_nextgen_themes() {
             1) select_ohmyposh_subthemes ;;
             2) select_spaceship_subpresets ;;
             3)
+                _clear_prompt_engines
                 mkdir -p "$HOME/.zsh"
                 touch "${HOME}/.zshrc"
                 [[ ! -d "$HOME/.zsh/pure" ]] && git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"

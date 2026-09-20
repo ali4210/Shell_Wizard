@@ -111,6 +111,26 @@ enable_global_cli() {
     pause
 }
 
+# Remove other prompt engines' init lines so the newly chosen theme wins
+_clear_prompt_engines() {
+    local rc
+    for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
+        [[ -f "$rc" ]] || continue
+        sed -i -e '/starship init/d' -e '/# Starship Cross-Shell Prompt/d' \
+               -e '/oh-my-posh init/d' -e '/# Oh My Posh (Shell-Wizard)/d' \
+               -e '/^prompt pure/d' -e '/^autoload -U promptinit/d' \
+               -e '/^fpath+=(\$HOME\/.zsh\/pure)/d' "$rc" 2>/dev/null || true
+    done
+}
+
+_need_zsh() {
+    if ! command -v zsh &>/dev/null; then
+        echo -e "${YELLOW}[!] ZSH is not installed. This option only works with ZSH.${NC}"
+        echo -e "${CYAN}    Install it (e.g. sudo apt install zsh) or use Starship / Oh My Posh, which also work in Bash.${NC}"
+        return 1
+    fi
+}
+
 run_module() {
     local file="${MODULES_DIR}/$1"
     local entry="$2"
@@ -154,7 +174,9 @@ while true; do
         6) run_module "nextgen-engine.sh" "manage_nextgen_themes"; pause ;;
         7) run_module "reload-engine.sh" "reload_active_shell"; pause ;;
         8) enable_global_cli ;;
-        0) echo -e "\n${GREEN}Make your terminal your masterpiece! Goodbye!${NC}"; exit 0 ;;
+        0) echo -e "\n${GREEN}Make your terminal your masterpiece! Goodbye!${NC}"
+           echo -e "${CYAN}[💡] To see theme changes, run: ${BOLD}exec zsh${NC}${CYAN} (or open a new terminal tab).${NC}"
+           exit 0 ;;
         *) echo -e "\n${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
 done

@@ -6,12 +6,26 @@
 #               to apply all themes, plugins, and aliases immediately.
 # ==============================================================================
 
+_install_reload_hook() {
+    local rc sh marker="# Shell-Wizard auto-reload"
+    for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
+        [[ -f "$rc" ]] || continue
+        grep -q "$marker" "$rc" && continue
+        case "$rc" in *zshrc) sh=zsh ;; *) sh=bash ;; esac
+        printf '\n%s\nshell-wizard() { command shell-wizard "$@"; exec %s; }\n' "$marker" "$sh" >> "$rc"
+        echo -e "${GREEN}[✔] Auto-reload hook added to ~/${rc##*/}${NC}"
+    done
+    command -v shell-wizard &>/dev/null || \
+        echo -e "${YELLOW}[i] Run main menu option 8 so the 'shell-wizard' command exists.${NC}"
+}
+
 reload_active_shell() {
     show_header
     echo -e "${YELLOW}${BOLD}⚡ MODULE 7: INSTANT SHELL RELOADER ENGINE${NC}\n"
 
     # Detect current running shell
     CURRENT_SHELL=$(basename "$SHELL")
+_install_reload_hook
 
     echo -e "${CYAN}--> Flushing terminal buffers and applying updated shell configuration...${NC}\n"
     sleep 0.5

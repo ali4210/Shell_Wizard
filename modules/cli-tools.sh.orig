@@ -72,15 +72,8 @@ enable_startup_banner() {
     local rc S="# >>> shell-wizard dashboard >>>" E="# <<< shell-wizard dashboard <<<"
     echo -e "\n${CYAN}--> Enabling system dashboard on terminal startup...${NC}"
     if ! command -v fastfetch &>/dev/null && ! command -v neofetch &>/dev/null; then
-        echo -e "${YELLOW}[!] Neither fastfetch nor neofetch is installed.${NC}"
-        read -p "Install it now? [y/N]: " ANS
-        if [[ "$ANS" =~ ^[Yy]$ ]]; then
-            install_cli_tools
-        fi
-        if ! command -v fastfetch &>/dev/null && ! command -v neofetch &>/dev/null; then
-            echo -e "${RED}[!] Still not installed, so the banner was not enabled.${NC}"
-            return 1
-        fi
+        echo -e "${RED}[!] Neither fastfetch nor neofetch is installed. Run option 2 first.${NC}"
+        return 1
     fi
     for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
         [[ -f "$rc" ]] || continue
