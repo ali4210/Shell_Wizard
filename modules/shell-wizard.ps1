@@ -373,7 +373,13 @@ function Restore-ShellWizardBackup {
     $SelectIndex = Read-Host "Select backup number to restore [1-$($Backups.Count)] (or C to cancel)"
     if ($SelectIndex -eq "C" -or $SelectIndex -eq "c") { return }
 
-    $Index = [int]$SelectIndex - 1
+    $ParsedIndex = 0
+    if (-not [int]::TryParse($SelectIndex, [ref]$ParsedIndex)) {
+        Write-Host "`n[!] Invalid selection." -ForegroundColor Red
+        Pause-Console
+        return
+    }
+    $Index = $ParsedIndex - 1
     if ($Index -lt 0 -or $Index -ge $Backups.Count) {
         Write-Host "`n[!] Invalid selection." -ForegroundColor Red
         Pause-Console

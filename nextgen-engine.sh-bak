@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# MODULE NAME:  nextgen-engine.sh (Module 6 - Universal Next-Gen & Sub-Theme Engine)
+# AUTHOR:       Saleem (Open Source DevOps/Sec Contributor)
+# DESCRIPTION:  Installs Next-Gen engines with 1-click sub-theme selectors.
+# ==============================================================================
+
+# --- Helper: Inject Sub-Theme into Configuration Files ---
+apply_ohmyposh_theme() {
+    local THEME_NAME="$1"
+    local THEME_URL="https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/${THEME_NAME}.omp.json"
+
+    # Disable conflicting OMZ ZSH_THEME
+    if [[ -f "${HOME}/.zshrc" ]]; then
+        sed -i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
+    fi
+
+    # Update or inject oh-my-posh init in ~/.zshrc and ~/.bashrc
+    for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
+        if [[ -f "$rc" ]]; then
+            sed -i '/oh-my-posh init/d' "$rc" 2>/dev/null || true
+            local SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
+            echo "eval \"\$(oh-my-posh init ${SHELL_NAME} --config ${THEME_URL})\"" >> "$rc"
+        fi
+    done
+
+    echo -e "\n${GREEN}[✔] Oh My Posh Sub-Theme '${THEME_NAME}' applied successfully!${NC}"
+    echo -e "${CYAN}[💡] Select Option [7] in the Main Menu (or run 'exec zsh') to load your new prompt instantly.${NC}\n"
+}
+
+# --- Sub-Menu: Oh My Posh Sub-Themes ---
+select_ohmyposh_subthemes() {
+    # Ensure binary is present
+    if ! command -v oh-my-posh &>/dev/null; then
+        echo -e "${CYAN}--> Installing Oh My Posh engine first...${NC}"
+        sudo curl -sSL https://ohmyposh.dev/install.sh | sudo bash -s -- -d /usr/local/bin
+    fi
+
+    while true; do
+        show_header
+        echo -e "${YELLOW}${BOLD}🎨 OH MY POSH SUB-THEME SELECTOR${NC}\n"
+        echo -e "  ${GREEN}[1]${NC} Jebree ${CYAN}(High-Contrast Segmented DevOps Theme)${NC}"
+        echo -e "  ${GREEN}[2]${NC} Paradox ${CYAN}(Classic Powerline Segmented Layout)${NC}"
+        echo -e "  ${GREEN}[3]${NC} Agnoster ${CYAN}(Clean Color-Coded Branch & Status Prompt)${NC}"
+        echo -e "  ${GREEN}[4]${NC} Bubbles ${CYAN}(Modern Rounded Segmented Aesthetic)${NC}"
+        echo -e "  ${GREEN}[5]${NC} M365princess ${CYAN}(Pastel Neon Cyberpunk Layout)${NC}"
+        echo -e "  ${GREEN}[6]${NC} Back to Next-Gen Menu"
+        echo -e "\n===================================================================="
+        read -p "Select sub-theme [1-6]: " OMP_CHOICE
+
+        case $OMP_CHOICE in
+            1) apply_ohmyposh_theme "jebree"; pause ;;
+            2) apply_ohmyposh_theme "paradox"; pause ;;
+            3) apply_ohmyposh_theme "agnoster"; pause ;;
+            4) apply_ohmyposh_theme "bubbles"; pause ;;
+            5) apply_ohmyposh_theme "m365princess"; pause ;;
+            6) break ;;
+            *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
+        esac
+    done
+}
+
+# --- Sub-Menu: Spaceship Sub-Presets ---
+select_spaceship_subpresets() {
+    local ZSH_CUSTOM="${HOME}/.oh-my-zsh/custom"
+    
+    if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
+        echo -e "${RED}[!] Oh My Zsh is required for Spaceship. Please run Module 3 first.${NC}"
+        pause
+        return 1
+    fi
+
+    if [[ ! -d "${ZSH_CUSTOM}/themes/spaceship-prompt" ]]; then
+        echo -e "${CYAN}--> Installing Spaceship Prompt repository...${NC}"
+        git clone https://github.com/spaceship-prompt/spaceship-prompt.git "${ZSH_CUSTOM}/themes/spaceship-prompt" --depth=1
+        ln -sf "${ZSH_CUSTOM}/themes/spaceship-prompt/spaceship.zsh-theme" "${ZSH_CUSTOM}/themes/spaceship.zsh-theme" 2>/dev/null || true
+    fi
+
+    # Ensure ZSH_THEME="spaceship"
+    sed -i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
+    sed -i 's/^ZSH_THEME=".*"/ZSH_THEME="spaceship"/g' "${HOME}/.zshrc"
+
+    while true; do
+        show_header
+        echo -e "${YELLOW}${BOLD}🚀 SPACESHIP PRESET STYLE SELECTOR${NC}\n"
+        echo -e "  ${GREEN}[1]${NC} Full-Stack DevOps Preset ${CYAN}(Git, Docker, K8s, Node, Python, AWS)${NC}"
+        echo -e "  ${GREEN}[2]${NC} Minimalist Fast Preset ${CYAN}(Directory, Git Status, Execution Time)${NC}"
+        echo -e "  ${GREEN}[3]${NC} Two-Line Cyberpunk Preset ${CYAN}(Prompt input on dedicated newline)${NC}"
+        echo -e "  ${GREEN}[4]${NC} Back to Next-Gen Menu"
+        echo -e "\n===================================================================="
+        read -p "Select preset [1-4]: " SPACE_CHOICE
+
+        case $SPACE_CHOICE in
+            1)
+                sed -i '/SPACESHIP_PROMPT_ADD_NEWLINE=/d' "${HOME}/.zshrc" 2>/dev/null || true
+                echo 'SPACESHIP_PROMPT_ADD_NEWLINE=true' >> "${HOME}/.zshrc"
+                echo -e "${GREEN}[✔] Full-Stack DevOps Spaceship Preset Applied!${NC}"
+                pause
+                ;;
+            2)
+                echo -e '\nSPACESHIP_DOCKER_SHOW=false\nSPACESHIP_KUBECTL_SHOW=false\nSPACESHIP_NODE_SHOW=false' >> "${HOME}/.zshrc"
+                echo -e "${GREEN}[✔] Minimalist Fast Spaceship Preset Applied!${NC}"
+                pause
+                ;;
+            3)
+                echo -e '\nSPACESHIP_PROMPT_SEPARATE_LINE=true' >> "${HOME}/.zshrc"
+                echo -e "${GREEN}[✔] Two-Line Cyberpunk Spaceship Preset Applied!${NC}"
+                pause
+                ;;
+            4) break ;;
+            *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
+        esac
+    done
+}
+
+# --- Install Atuin Interactive History ---
+install_atuin_engine() {
+    echo -e "${CYAN}--> Installing Atuin Interactive SQLite Shell History...${NC}"
+    if ! command -v atuin &>/dev/null; then
+        curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
+    fi
+
+    for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
+        if [[ -f "$rc" ]]; then
+            if ! grep -q "atuin init" "$rc"; then
+                local SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
+                echo -e "\n# Atuin History\neval \"\$(atuin init ${SHELL_NAME})\"" >> "$rc"
+            fi
+        fi
+    done
+
+    echo -e "\n${GREEN}[✔] ATUIN INTERACTIVE SHELL HISTORY ACTIVE!${NC}"
+    echo -e "${CYAN}📌 Usage: Press CTRL + R or UP ARROW in terminal to search history.${NC}"
+    pause
+}
+
+# --- Module 6 Main Interactive Menu ---
+manage_nextgen_themes() {
+    while true; do
+        show_header
+        echo -e "${YELLOW}${BOLD}[+] Module 6: Universal Next-Gen Theme & Sub-Theme Suite${NC}\n"
+        echo -e "  ${GREEN}[1]${NC} Oh My Posh Sub-Theme Selector ${CYAN}(Jebree, Paradox, Agnoster, Bubbles, M365princess)${NC}"
+        echo -e "  ${GREEN}[2]${NC} Spaceship Prompt Style Selector ${CYAN}(Full-Stack DevOps, Minimalist, Two-Line Layouts)${NC}"
+        echo -e "  ${GREEN}[3]${NC} Pure Minimalist Prompt ${CYAN}(Blazing Fast Single-Line Shell Prompt)${NC}"
+        echo -e "  ${GREEN}[4]${NC} Atuin Shell History UI ${CYAN}(SQLite Fuzzy Search via CTRL+R / UP ARROW)${NC}"
+        echo -e "  ${GREEN}[5]${NC} Back to Main Menu"
+        echo -e "\n===================================================================="
+        read -p "Select choice [1-5]: " N_CHOICE
+
+        case $N_CHOICE in
+            1) select_ohmyposh_subthemes ;;
+            2) select_spaceship_subpresets ;;
+            3) 
+                mkdir -p "$HOME/.zsh"
+                [[ ! -d "$HOME/.zsh/pure" ]] && git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
+                sed -i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
+                sed -i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
+                if ! grep -q "fpath+=(\$HOME/.zsh/pure)" "${HOME}/.zshrc"; then
+                    echo -e "\nfpath+=(\$HOME/.zsh/pure)\nautoload -U promptinit; promptinit\nprompt pure" >> "${HOME}/.zshrc"
+                fi
+                echo -e "${GREEN}[✔] Pure Minimalist Prompt Applied!${NC}"
+                pause
+                ;;
+            4) install_atuin_engine ;;
+            5) break ;;
+            *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
+        esac
+    done
+}

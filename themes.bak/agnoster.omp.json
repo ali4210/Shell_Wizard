@@ -1,6 +1,5 @@
 {
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
-  "version": 2,
   "final_space": true,
   "blocks": [
     {
@@ -9,31 +8,22 @@
       "segments": [
         {
           "type": "session",
-          "style": "diamond",
-          "leading_diamond": "\ue0b6",
-          "trailing_diamond": "\ue0b0",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
           "foreground": "#ffffff",
-          "background": "#007acc",
+          "background": "#d3d7cf",
           "template": " {{ .UserName }} "
         },
         {
           "type": "path",
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
-          "foreground": "#000000",
-          "background": "#0099ff",
+          "foreground": "#ffffff",
+          "background": "#3465a4",
           "properties": {
             "style": "folder"
           },
-          "template": " \uf07c {{ .Path }} "
-        },
-        {
-          "type": "git",
-          "style": "powerline",
-          "powerline_symbol": "\ue0b0",
-          "foreground": "#000000",
-          "background": "#00e6e6",
-          "template": " \ue725 {{ .HEAD }} "
+          "template": " {{ .Path }} "
         }
       ]
     }

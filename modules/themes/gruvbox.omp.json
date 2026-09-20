@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
   "version": 2,
+  "final_space": true,
   "blocks": [
     {
       "type": "prompt",
@@ -13,7 +14,9 @@
           "trailing_diamond": "\ue0b0",
           "foreground": "#282828",
           "background": "#d79921",
-          "properties": { "style": "full" },
+          "properties": {
+            "style": "full"
+          },
           "template": " \uf07c {{ .Path }} "
         },
         {

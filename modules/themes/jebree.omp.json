@@ -1,5 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 2,
   "final_space": true,
   "blocks": [
     {
@@ -20,7 +21,7 @@
           "style": "powerline",
           "powerline_symbol": "\ue0b0",
           "foreground": "#ffffff",
-          "background": "#ef5350",
+          "background": "#d32f2f",
           "properties": {
             "style": "folder"
           },

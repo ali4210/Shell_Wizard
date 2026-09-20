@@ -47,7 +47,7 @@ Built for developers, sysadmins, DevOps and security engineers who live in the t
     <td align="center"><h3>7</h3><sub>Linux/macOS<br/>modules</sub></td>
     <td align="center"><h3>2</h3><sub>Native engines<br/>(Bash + PowerShell)</sub></td>
     <td align="center"><h3>3</h3><sub>Operating systems<br/>(Linux, macOS, Windows)</sub></td>
-    <td align="center"><h3>11</h3><sub>Offline themes<br/>with live preview</sub></td>
+    <td align="center"><h3>11</h3><sub>Offline themes<br/>shared by every OS</sub></td>
     <td align="center"><h3>15</h3><sub>CLI tools on Windows<br/>(eza, bat, lazygit...)</sub></td>
     <td align="center"><h3>1</h3><sub>Click to roll back<br/>a snapshot</sub></td>
   </tr>
@@ -86,7 +86,7 @@ Most guides leave you copy-pasting commands from ten tabs. Shell-Wizard puts the
 | Situation | 😬 By hand | 🧙 Shell-Wizard |
 |---|---|---|
 | Install a Nerd Font | Download, unzip, copy, `fc-cache`, configure terminal | **One click**, cache refreshed, terminal directions shown (font auto-applied on Windows Terminal) |
-| Try a prompt theme | Edit config, reload, repeat | Pick from a menu; **live preview** before applying on Windows |
+| Try a prompt theme | Edit config, reload, repeat | Pick from a menu of 11 offline themes; **live preview** before applying on Windows |
 | Change your PowerShell profile | Edit `$PROFILE` and risk clobbering your own lines | Writes only inside a **managed block**, the rest is untouched |
 | Something breaks | Hope you kept a copy | **Timestamped snapshots** with one-click restore (SHA-256 verified on Windows) |
 | Install modern CLI tools | Look up each package name per OS | **One step**: detects `brew` / `apt` / `dnf` / `pacman` / `winget` |
@@ -108,7 +108,7 @@ Most guides leave you copy-pasting commands from ten tabs. Shell-Wizard puts the
 | 🛠️ | **CLI modernization** | `eza`, `bat`, `fzf`, `fastfetch`, `fd`, `ripgrep` with smart aliases |
 | 🚀 | **Starship presets** | Gruvbox Rainbow, Tokyo Night, Nerd Font Symbols, Bracketed, Plain |
 | 🌌 | **Next-gen prompts** | Oh My Posh sub-themes, Spaceship presets, Pure, Atuin history search |
-| 🎨 | **11 offline themes** | Ship locally for Windows, so theme switching works without internet |
+| 🎨 | **11 offline themes** | The same theme files ship in `modules/themes/` and are used by Linux, macOS and Windows, so switching works without internet |
 | 🧪 | **Dry-Run mode** | Preview every change before anything is written *(Windows)* |
 | 🔄 | **Instant reload** | Apply changes without closing your terminal |
 | 🌍 | **Global command** | Optional: run `shell-wizard` from any folder |
@@ -355,7 +355,7 @@ flowchart TD
 |---|---|---|
 | Fix broken icons | `2` → `2` or `3` (install a font) | `6` → pick a font |
 | Get Oh My Zsh + Powerlevel10k | `3` → `1` | n/a |
-| Try a prompt theme with preview | `6` → `1` (Oh My Posh) | `3` → pick a theme → confirm |
+| Try a prompt theme | `6` → `1` (Oh My Posh, 11 themes) | `3` → pick a theme → live preview → confirm |
 | Use Starship | `5` → `1`, then `2` for presets | `4` → `1` |
 | Install modern CLI tools | `4` → `1` | `5` |
 | Preview changes without writing | n/a | press `D` |
@@ -448,7 +448,7 @@ Installs [Starship](https://starship.rs) and initializes it in your shell config
 
 | Option | What you get |
 |---|---|
-| **Oh My Posh** | Sub-themes: Jebree, Paradox, Agnoster, Bubbles, M365princess |
+| **Oh My Posh** | All 11 local themes: Jebree, Paradox, Agnoster, Bubbles, Dracula, Blueish, Tokyo Night, Catppuccin Mocha, Gruvbox, Nord, Rose Pine |
 | **Spaceship** | Presets: Full-Stack DevOps, Minimalist Fast, Two-Line (requires Oh My Zsh, so run Module 3 first) |
 | **Pure** | Fast minimalist single-line prompt |
 | **Atuin** | SQLite-backed shell history with fuzzy search on `Ctrl+R` / `↑` |
@@ -513,13 +513,13 @@ The status header on every screen reads from this file.
 
 <a id="themes"></a>
 
-## 🎨 Theme Gallery (Windows)
+## 🎨 Theme Gallery
 
-Eleven Oh My Posh themes ship locally in `modules/themes/`, so switching works **offline**, with a **live preview** before you apply.
+Eleven Oh My Posh themes ship locally in `modules/themes/`. The **same files are used on Linux, macOS and Windows**, so a theme looks the same everywhere and switching works **offline**. Windows adds a **live preview** before you apply.
 
 | Theme | Palette | Style | Segments |
 |---|---|---|---|
-| **Jebree** *(default)* | ![](https://img.shields.io/badge/_____-0077c2?style=flat-square) ![](https://img.shields.io/badge/_____-ef5350?style=flat-square) ![](https://img.shields.io/badge/_____-ffca28?style=flat-square) | Blue, red and yellow powerline | OS icon → folder path → Git branch |
+| **Jebree** *(default)* | ![](https://img.shields.io/badge/_____-0077c2?style=flat-square) ![](https://img.shields.io/badge/_____-d32f2f?style=flat-square) ![](https://img.shields.io/badge/_____-ffca28?style=flat-square) | Blue, red and yellow powerline | OS icon → folder path → Git branch |
 | **Paradox** | ![](https://img.shields.io/badge/_____-0077c2?style=flat-square) ![](https://img.shields.io/badge/_____-4e9a06?style=flat-square) | Classic powerline | Path → Git branch |
 | **Agnoster** | ![](https://img.shields.io/badge/_____-d3d7cf?style=flat-square) ![](https://img.shields.io/badge/_____-3465a4?style=flat-square) | Clean status prompt | User → path |
 | **Bubbles** | ![](https://img.shields.io/badge/_____-8a2be2?style=flat-square) | Rounded purple pill | Path |
@@ -533,6 +533,8 @@ Eleven Oh My Posh themes ship locally in `modules/themes/`, so switching works *
 
 > [!TIP]
 > All prompt themes rely on Nerd Font glyphs. If you see empty boxes, set your terminal font to a Nerd Font (Font Studio on Windows, or Module 2 on Linux/macOS).
+>
+> Themes use 24-bit (hex) colors. On macOS, use a truecolor terminal such as iTerm2, Ghostty, WezTerm or kitty for accurate colors. All 11 themes keep at least a 4.5:1 text-to-background contrast, so prompts stay readable.
 
 ---
 
@@ -618,7 +620,8 @@ Nothing is magic. Here is what the friendly menus actually do:
 | Reload shell | `exec zsh` or `exec bash` |
 | Global command (Linux/macOS) | `sudo ln -sf autorun.sh /usr/local/bin/shell-wizard` |
 | Windows supercharge | `winget install JanDeDobbeleer.OhMyPosh` → `oh-my-posh font install CascadiaCode` → `Install-Module Terminal-Icons, PSReadLine` |
-| Windows theme | `oh-my-posh init pwsh --config <theme>.omp.json` written into the managed block |
+| Prompt theme (Linux/macOS) | `eval "$(oh-my-posh init <shell> --config modules/themes/<theme>.omp.json)"` added to `~/.zshrc` / `~/.bashrc` (any previous init line is replaced) |
+| Prompt theme (Windows) | `oh-my-posh init pwsh --config <theme>.omp.json` written into the managed block |
 | Windows CLI tools | `winget install <id>` for each missing tool |
 | Backup (Windows) | Hash source → copy to temp file → verify hash → move into place (retries up to 3 times) |
 
@@ -660,6 +663,7 @@ flowchart TD
 
 | Decision | Why it matters |
 |---|---|
+| 🎨 **One theme set for every OS** | Oh My Posh themes are shell- and OS-independent JSON, so Linux, macOS and Windows load the same local files from `modules/themes/`. Consistent look, no network needed |
 | 🧩 **Two native engines, one experience** | Bash on Unix-like systems and PowerShell on Windows, with the same menu-driven flow |
 | 🧱 **Managed profile block** | The Windows engine rewrites only its own block, so your hand-written profile lines survive every change |
 | ♻️ **Idempotent by design** | Aliases and init lines are checked before being added, and installed tools are detected before installing |
@@ -682,7 +686,7 @@ flowchart TD
 | Backup and restore | ✅ | 🚧 | ✅ (SHA-256 verified) |
 | Nerd Font installer | ✅ (Meslo, JetBrainsMono) | 🚧 | ✅ (Cascadia, JetBrainsMono, FiraCode, auto-applied) |
 | Oh My Zsh + Powerlevel10k | ✅ | 🚧 | n/a |
-| Oh My Posh themes | ✅ (5, downloaded) | 🚧 | ✅ (11, offline, live preview) |
+| Oh My Posh themes | ✅ (11, offline) | 🚧 | ✅ (11, offline, live preview) |
 | Starship | ✅ (5 presets) | 🚧 | ✅ |
 | Spaceship / Pure / Atuin | ✅ | 🚧 | Atuin as a CLI tool |
 | Modern CLI tools | ✅ (6 tools + aliases) | 🚧 | ✅ (15 tools) |
@@ -883,7 +887,6 @@ Windows and Linux are both stable with all modules working. Windows has a few ex
 - [ ] 🧪 Dry-Run mode and state tracking for Linux
 - [ ] 📄 Add a `LICENSE` file and tagged GitHub Releases
 - [ ] 🤖 CI with ShellCheck for Bash and PSScriptAnalyzer for PowerShell
-- [ ] 🎨 Ship the 11 themes locally on Linux as well
 - [ ] 📸 Screenshot and demo GIF gallery
 
 ---
