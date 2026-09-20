@@ -30,6 +30,7 @@ inject_aliases() {
 
     local ALIAS_BLOCK='
 # --- Shell-Wizard Modern CLI Aliases ---
+export EZA_COLORS="hd=1;38;5;220:uu=38;5;81:da=38;5;180:sn=38;5;114"
 if command -v eza &>/dev/null; then
     alias ls="eza --icons --group-directories-first"
     alias ll="eza -lh --icons --group-directories-first"

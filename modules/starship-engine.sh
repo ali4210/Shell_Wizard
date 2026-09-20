@@ -12,7 +12,11 @@ install_starship() {
     echo -e "${CYAN}--> Checking for Starship Prompt Engine...${NC}"
     if ! command -v starship &>/dev/null; then
         echo -e "${GREEN}--> Installing Starship...${NC}"
-        curl -sS https://starship.rs/install.sh | sh -s -- -y
+        curl -fsS https://starship.rs/install.sh | sh -s -- -y
+        if ! command -v starship &>/dev/null; then
+            echo -e "${RED}[!] Starship install failed (check internet or sudo).${NC}"
+            return 1
+        fi
         echo -e "${GREEN}[✔] Starship installed successfully!${NC}"
     else
         echo -e "${GREEN}[✔] Starship is already installed.${NC}"
@@ -23,7 +27,7 @@ install_starship() {
         if [[ -f "$rc" ]]; then
             if ! grep -q "starship init" "$rc"; then
                 local SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
-                echo -e "\n# Starship Cross-Shell Prompt\neval \"\$(starship init ${SHELL_NAME})\"" >> "$rc"
+                echo -e "\n# Starship Cross-Shell Prompt\ncommand -v starship >/dev/null 2>&1 && eval \"\$(starship init ${SHELL_NAME})\"" >> "$rc"
                 echo -e "  ${GREEN}[✔] Starship initialized in ~/${rc##*/}${NC}"
             fi
         fi

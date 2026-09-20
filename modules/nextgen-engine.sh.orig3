@@ -164,17 +164,17 @@ select_spaceship_subpresets() {
 
         case $SPACE_CHOICE in
             1)
-                _spaceship_write_preset $'SPACESHIP_PROMPT_ADD_NEWLINE=true\nSPACESHIP_PROMPT_ORDER=(dir git node python docker kubectl aws exec_time line_sep char)\nSPACESHIP_CHAR_SYMBOL="🚀 "'
+                _spaceship_write_preset 'SPACESHIP_PROMPT_ADD_NEWLINE=true'
                 echo -e "${GREEN}[✔] Full-Stack DevOps Spaceship Preset Applied!${NC}"
                 pause
                 ;;
             2)
-                _spaceship_write_preset $'SPACESHIP_PROMPT_ADD_NEWLINE=false\nSPACESHIP_PROMPT_ORDER=(dir git exec_time char)\nSPACESHIP_DIR_TRUNC=1\nSPACESHIP_CHAR_SYMBOL="❯ "'
+                _spaceship_write_preset $'SPACESHIP_DOCKER_SHOW=false\nSPACESHIP_KUBECTL_SHOW=false\nSPACESHIP_NODE_SHOW=false'
                 echo -e "${GREEN}[✔] Minimalist Fast Spaceship Preset Applied!${NC}"
                 pause
                 ;;
             3)
-                _spaceship_write_preset $'SPACESHIP_PROMPT_ADD_NEWLINE=true\nSPACESHIP_TIME_SHOW=true\nSPACESHIP_USER_SHOW=always\nSPACESHIP_HOST_SHOW=always\nSPACESHIP_PROMPT_ORDER=(time user host dir git exec_time line_sep char)\nSPACESHIP_CHAR_SYMBOL="⚡ "'
+                _spaceship_write_preset 'SPACESHIP_PROMPT_SEPARATE_LINE=true'
                 echo -e "${GREEN}[✔] Two-Line Cyberpunk Spaceship Preset Applied!${NC}"
                 pause
                 ;;
