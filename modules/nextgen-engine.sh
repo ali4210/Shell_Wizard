@@ -3,29 +3,73 @@
 # MODULE NAME:  nextgen-engine.sh (Module 6 - Universal Next-Gen & Sub-Theme Engine)
 # AUTHOR:       Saleem (Open Source DevOps/Sec Contributor)
 # DESCRIPTION:  Installs Next-Gen engines with 1-click sub-theme selectors.
+#               Oh My Posh themes are loaded from the LOCAL modules/themes folder
+#               (same 11 theme files as the Windows engine) - no download needed.
 # ==============================================================================
+
+# Resolve the themes folder from this module's own location (works whether the
+# module is sourced or executed, and regardless of the caller's variables).
+NEXTGEN_MODULE_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+THEMES_DIR="${NEXTGEN_MODULE_DIR}/themes"
+
+# Portable in-place sed (GNU sed on Linux, BSD sed on macOS)
+_sed_i() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
+# Theme catalogue: file-name | display name | description
+OMP_THEMES=(
+    "jebree|Jebree|Blue, red & yellow DevOps powerline (OS icon, folder, Git)"
+    "paradox|Paradox|Classic powerline (path, Git)"
+    "agnoster|Agnoster|Clean status prompt (user, path)"
+    "bubbles|Bubbles|Rounded purple pill (path)"
+    "dracula|Dracula|Purple, pink & green (OS icon, path, Git)"
+    "blueish|Blueish|Cyan-blue powerline (user, path, Git)"
+    "tokyonight|Tokyo Night|Pastel neon dark (clock, path, Git)"
+    "catppuccin|Catppuccin Mocha|Soft pastel (user, path, Git)"
+    "gruvbox|Gruvbox|Warm retro palette (path, Git)"
+    "nord|Nord|Cool arctic blue (path, Git)"
+    "rosepine|Rose Pine|Vintage soft palette (path, Git)"
+)
 
 # --- Helper: Inject Sub-Theme into Configuration Files ---
 apply_ohmyposh_theme() {
     local THEME_NAME="$1"
-    local THEME_URL="https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/${THEME_NAME}.omp.json"
+    local THEME_FILE="${THEMES_DIR}/${THEME_NAME}.omp.json"
+
+    if [[ ! -f "$THEME_FILE" ]]; then
+        echo -e "\n${RED}[!] Theme file not found: ${THEME_FILE}${NC}"
+        echo -e "${YELLOW}[i] Make sure the 'modules/themes' folder is present in your Shell_Wizard directory.${NC}"
+        return 1
+    fi
 
     # Disable conflicting OMZ ZSH_THEME
     if [[ -f "${HOME}/.zshrc" ]]; then
-        sed -i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
+        _sed_i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
     fi
 
-    # Update or inject oh-my-posh init in ~/.zshrc and ~/.bashrc
+    # Replace any previous oh-my-posh init in ~/.zshrc and ~/.bashrc
     for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
         if [[ -f "$rc" ]]; then
-            sed -i '/oh-my-posh init/d' "$rc" 2>/dev/null || true
-            local SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
-            echo "eval \"\$(oh-my-posh init ${SHELL_NAME} --config ${THEME_URL})\"" >> "$rc"
+            _sed_i '/oh-my-posh init/d' "$rc" 2>/dev/null || true
+            _sed_i '/# Oh My Posh (Shell-Wizard)/d' "$rc" 2>/dev/null || true
+            local SHELL_NAME
+            SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
+            printf '\n# Oh My Posh (Shell-Wizard)\neval "$(oh-my-posh init %s --config "%s")"\n' \
+                "$SHELL_NAME" "$THEME_FILE" >> "$rc"
         fi
     done
 
     echo -e "\n${GREEN}[✔] Oh My Posh Sub-Theme '${THEME_NAME}' applied successfully!${NC}"
-    echo -e "${CYAN}[💡] Select Option [7] in the Main Menu (or run 'exec zsh') to load your new prompt instantly.${NC}\n"
+    echo -e "${CYAN}[💡] Select Option [7] in the Main Menu (or run 'exec zsh') to load your new prompt instantly.${NC}"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -e "${YELLOW}[i] macOS tip: themes use 24-bit colors. Use iTerm2, Ghostty, WezTerm or kitty for accurate colors.${NC}"
+    fi
+    echo ""
 }
 
 # --- Sub-Menu: Oh My Posh Sub-Themes ---
@@ -33,37 +77,55 @@ select_ohmyposh_subthemes() {
     # Ensure binary is present
     if ! command -v oh-my-posh &>/dev/null; then
         echo -e "${CYAN}--> Installing Oh My Posh engine first...${NC}"
-        sudo curl -sSL https://ohmyposh.dev/install.sh | sudo bash -s -- -d /usr/local/bin
+        curl -sSL https://ohmyposh.dev/install.sh | sudo bash -s -- -d /usr/local/bin
     fi
+
+    local COUNT=${#OMP_THEMES[@]}
 
     while true; do
         show_header
-        echo -e "${YELLOW}${BOLD}🎨 OH MY POSH SUB-THEME SELECTOR${NC}\n"
-        echo -e "  ${GREEN}[1]${NC} Jebree ${CYAN}(High-Contrast Segmented DevOps Theme)${NC}"
-        echo -e "  ${GREEN}[2]${NC} Paradox ${CYAN}(Classic Powerline Segmented Layout)${NC}"
-        echo -e "  ${GREEN}[3]${NC} Agnoster ${CYAN}(Clean Color-Coded Branch & Status Prompt)${NC}"
-        echo -e "  ${GREEN}[4]${NC} Bubbles ${CYAN}(Modern Rounded Segmented Aesthetic)${NC}"
-        echo -e "  ${GREEN}[5]${NC} M365princess ${CYAN}(Pastel Neon Cyberpunk Layout)${NC}"
-        echo -e "  ${GREEN}[6]${NC} Back to Next-Gen Menu"
+        echo -e "${YELLOW}${BOLD}🎨 OH MY POSH SUB-THEME SELECTOR (${COUNT} LOCAL THEMES)${NC}\n"
+        local i=1 entry NAME LABEL DESC
+        for entry in "${OMP_THEMES[@]}"; do
+            IFS='|' read -r NAME LABEL DESC <<< "$entry"
+            printf "  ${GREEN}[%2d]${NC} %-17s ${CYAN}(%s)${NC}\n" "$i" "$LABEL" "$DESC"
+            i=$((i+1))
+        done
+        printf "  ${GREEN}[%2d]${NC} Back to Next-Gen Menu\n" "$((COUNT+1))"
         echo -e "\n===================================================================="
-        read -p "Select sub-theme [1-6]: " OMP_CHOICE
+        read -p "Select sub-theme [1-$((COUNT+1))]: " OMP_CHOICE
 
-        case $OMP_CHOICE in
-            1) apply_ohmyposh_theme "jebree"; pause ;;
-            2) apply_ohmyposh_theme "paradox"; pause ;;
-            3) apply_ohmyposh_theme "agnoster"; pause ;;
-            4) apply_ohmyposh_theme "bubbles"; pause ;;
-            5) apply_ohmyposh_theme "m365princess"; pause ;;
-            6) break ;;
-            *) echo -e "${RED}Invalid selection!${NC}"; sleep 1 ;;
-        esac
+        if [[ "$OMP_CHOICE" =~ ^[0-9]+$ ]] && (( OMP_CHOICE >= 1 && OMP_CHOICE <= COUNT )); then
+            IFS='|' read -r NAME LABEL DESC <<< "${OMP_THEMES[$((OMP_CHOICE-1))]}"
+            apply_ohmyposh_theme "$NAME"
+            pause
+        elif [[ "$OMP_CHOICE" =~ ^[0-9]+$ ]] && (( OMP_CHOICE == COUNT+1 )); then
+            break
+        else
+            echo -e "${RED}Invalid selection!${NC}"; sleep 1
+        fi
     done
+}
+
+# --- Helper: write one Spaceship preset (replaces the previous one, no duplicates) ---
+_spaceship_write_preset() {
+    local rc="${HOME}/.zshrc"
+    touch "$rc"
+    _sed_i \
+        -e '/# >>> shell-wizard spaceship >>>/,/# <<< shell-wizard spaceship <<</d' \
+        -e '/^SPACESHIP_PROMPT_ADD_NEWLINE=/d' \
+        -e '/^SPACESHIP_DOCKER_SHOW=/d' \
+        -e '/^SPACESHIP_KUBECTL_SHOW=/d' \
+        -e '/^SPACESHIP_NODE_SHOW=/d' \
+        -e '/^SPACESHIP_PROMPT_SEPARATE_LINE=/d' \
+        "$rc" 2>/dev/null || true
+    printf '\n# >>> shell-wizard spaceship >>>\n%s\n# <<< shell-wizard spaceship <<<\n' "$1" >> "$rc"
 }
 
 # --- Sub-Menu: Spaceship Sub-Presets ---
 select_spaceship_subpresets() {
     local ZSH_CUSTOM="${HOME}/.oh-my-zsh/custom"
-    
+
     if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
         echo -e "${RED}[!] Oh My Zsh is required for Spaceship. Please run Module 3 first.${NC}"
         pause
@@ -77,8 +139,9 @@ select_spaceship_subpresets() {
     fi
 
     # Ensure ZSH_THEME="spaceship"
-    sed -i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
-    sed -i 's/^ZSH_THEME=".*"/ZSH_THEME="spaceship"/g' "${HOME}/.zshrc"
+    touch "${HOME}/.zshrc"
+    _sed_i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
+    _sed_i 's/^ZSH_THEME=".*"/ZSH_THEME="spaceship"/g' "${HOME}/.zshrc" 2>/dev/null || true
 
     while true; do
         show_header
@@ -92,18 +155,17 @@ select_spaceship_subpresets() {
 
         case $SPACE_CHOICE in
             1)
-                sed -i '/SPACESHIP_PROMPT_ADD_NEWLINE=/d' "${HOME}/.zshrc" 2>/dev/null || true
-                echo 'SPACESHIP_PROMPT_ADD_NEWLINE=true' >> "${HOME}/.zshrc"
+                _spaceship_write_preset 'SPACESHIP_PROMPT_ADD_NEWLINE=true'
                 echo -e "${GREEN}[✔] Full-Stack DevOps Spaceship Preset Applied!${NC}"
                 pause
                 ;;
             2)
-                echo -e '\nSPACESHIP_DOCKER_SHOW=false\nSPACESHIP_KUBECTL_SHOW=false\nSPACESHIP_NODE_SHOW=false' >> "${HOME}/.zshrc"
+                _spaceship_write_preset $'SPACESHIP_DOCKER_SHOW=false\nSPACESHIP_KUBECTL_SHOW=false\nSPACESHIP_NODE_SHOW=false'
                 echo -e "${GREEN}[✔] Minimalist Fast Spaceship Preset Applied!${NC}"
                 pause
                 ;;
             3)
-                echo -e '\nSPACESHIP_PROMPT_SEPARATE_LINE=true' >> "${HOME}/.zshrc"
+                _spaceship_write_preset 'SPACESHIP_PROMPT_SEPARATE_LINE=true'
                 echo -e "${GREEN}[✔] Two-Line Cyberpunk Spaceship Preset Applied!${NC}"
                 pause
                 ;;
@@ -123,7 +185,8 @@ install_atuin_engine() {
     for rc in "${HOME}/.zshrc" "${HOME}/.bashrc"; do
         if [[ -f "$rc" ]]; then
             if ! grep -q "atuin init" "$rc"; then
-                local SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
+                local SHELL_NAME
+                SHELL_NAME=$(basename "$rc" | sed 's/\.//;s/rc//')
                 echo -e "\n# Atuin History\neval \"\$(atuin init ${SHELL_NAME})\"" >> "$rc"
             fi
         fi
@@ -139,7 +202,7 @@ manage_nextgen_themes() {
     while true; do
         show_header
         echo -e "${YELLOW}${BOLD}[+] Module 6: Universal Next-Gen Theme & Sub-Theme Suite${NC}\n"
-        echo -e "  ${GREEN}[1]${NC} Oh My Posh Sub-Theme Selector ${CYAN}(Jebree, Paradox, Agnoster, Bubbles, M365princess)${NC}"
+        echo -e "  ${GREEN}[1]${NC} Oh My Posh Sub-Theme Selector ${CYAN}(11 local themes: Jebree, Paradox, Dracula, Tokyo Night, Nord...)${NC}"
         echo -e "  ${GREEN}[2]${NC} Spaceship Prompt Style Selector ${CYAN}(Full-Stack DevOps, Minimalist, Two-Line Layouts)${NC}"
         echo -e "  ${GREEN}[3]${NC} Pure Minimalist Prompt ${CYAN}(Blazing Fast Single-Line Shell Prompt)${NC}"
         echo -e "  ${GREEN}[4]${NC} Atuin Shell History UI ${CYAN}(SQLite Fuzzy Search via CTRL+R / UP ARROW)${NC}"
@@ -150,11 +213,12 @@ manage_nextgen_themes() {
         case $N_CHOICE in
             1) select_ohmyposh_subthemes ;;
             2) select_spaceship_subpresets ;;
-            3) 
+            3)
                 mkdir -p "$HOME/.zsh"
+                touch "${HOME}/.zshrc"
                 [[ ! -d "$HOME/.zsh/pure" ]] && git clone https://github.com/sindresorhus/pure.git "$HOME/.zsh/pure"
-                sed -i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
-                sed -i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
+                _sed_i '/oh-my-posh init/d' "${HOME}/.zshrc" 2>/dev/null || true
+                _sed_i 's/^ZSH_THEME=".*"/ZSH_THEME=""/g' "${HOME}/.zshrc" 2>/dev/null || true
                 if ! grep -q "fpath+=(\$HOME/.zsh/pure)" "${HOME}/.zshrc"; then
                     echo -e "\nfpath+=(\$HOME/.zsh/pure)\nautoload -U promptinit; promptinit\nprompt pure" >> "${HOME}/.zshrc"
                 fi
