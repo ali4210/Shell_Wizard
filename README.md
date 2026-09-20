@@ -135,7 +135,7 @@ See the full [parity table](#parity) further down.
 | 🍎 macOS | `autorun.sh` | `brew` | 🚧 Under active development |
 
 > [!NOTE]
-> Shell-Wizard is designed as a universal tool for all three platforms. The **Windows PowerShell engine is complete and fully runnable**. The Linux/macOS bash modules are still being finished and stabilized, so expect rough edges there. Bug reports and pull requests are especially welcome.
+> Shell-Wizard is designed as a universal tool for all three platforms. **Linux and Windows are stable, with every module working.** **macOS support is still under active development**, so expect rough edges there. macOS bug reports and pull requests are especially welcome.
 
 ---
 
@@ -153,7 +153,7 @@ See the full [parity table](#parity) further down.
 | **Network** | Needed for fonts, themes and packages | Needed for fonts, themes and packages |
 | **Terminal font** | A Nerd Font (the tool can install one) | A Nerd Font (the tool can install and apply one) |
 
-### 🐧 Linux and macOS *(🚧 under active development)*
+### 🐧 Linux and macOS *(Linux is stable; 🚧 macOS is under active development)*
 
 ```bash
 # 1. Get the code
@@ -370,7 +370,7 @@ flowchart TD
 ## 🧩 Modules in Detail (Linux / macOS)
 
 > [!NOTE]
-> The Linux/macOS engine (`linux/shell-wizard.sh`) is still under active development. The Windows engine, described in the [next section](#windows), is the fully working one.
+> The Unix engine (`linux/shell-wizard.sh`) is **stable on Linux** with all 7 modules working. **macOS support is still under active development.** The Windows engine is described in the [next section](#windows).
 
 <details>
 <summary><b>🔐 Module 1 · Safety & Backup Engine</b> (<code>backup-engine.sh</code>)</summary>
@@ -677,19 +677,20 @@ flowchart TD
 
 ## ⚖️ Platform Parity
 
-| Feature | 🐧 Linux / 🍎 macOS | 🪟 Windows |
-|---|:-:|:-:|
-| Backup and restore | 🚧 | ✅ (SHA-256 verified) |
-| Nerd Font installer | 🚧 (Meslo, JetBrainsMono) | ✅ (Cascadia, JetBrainsMono, FiraCode, auto-applied) |
-| Oh My Zsh + Powerlevel10k | 🚧 | n/a |
-| Oh My Posh themes | 🚧 (5, downloaded) | ✅ (11, offline, live preview) |
-| Starship | 🚧 (5 presets) | ✅ |
-| Spaceship / Pure / Atuin | 🚧 | Atuin as a CLI tool |
-| Modern CLI tools | 🚧 (6 tools + aliases) | ✅ (15 tools) |
-| Dry-Run mode | ➖ | ✅ |
-| State tracking | ➖ | ✅ |
-| Posh-Git / native prompt | ➖ | ✅ |
-| Global command | 🚧 | ✅ |
+| Feature | 🐧 Linux | 🍎 macOS | 🪟 Windows |
+|---|:-:|:-:|:-:|
+| Backup and restore | ✅ | 🚧 | ✅ (SHA-256 verified) |
+| Nerd Font installer | ✅ (Meslo, JetBrainsMono) | 🚧 | ✅ (Cascadia, JetBrainsMono, FiraCode, auto-applied) |
+| Oh My Zsh + Powerlevel10k | ✅ | 🚧 | n/a |
+| Oh My Posh themes | ✅ (5, downloaded) | 🚧 | ✅ (11, offline, live preview) |
+| Starship | ✅ (5 presets) | 🚧 | ✅ |
+| Spaceship / Pure / Atuin | ✅ | 🚧 | Atuin as a CLI tool |
+| Modern CLI tools | ✅ (6 tools + aliases) | 🚧 | ✅ (15 tools) |
+| Instant shell reload | ✅ | 🚧 | ✅ |
+| Global command | ✅ | 🚧 | ✅ |
+| Dry-Run mode | ➖ | ➖ | ✅ |
+| State tracking | ➖ | ➖ | ✅ |
+| Posh-Git / native prompt | ➖ | ➖ | ✅ |
 
 > ✅ working · 🚧 under active development · ➖ not available yet · n/a not applicable
 
@@ -868,7 +869,7 @@ Run `autorun.sh` inside your WSL distro as you would on Linux. Terminal font set
 
 <br/>
 
-Windows. The Linux/macOS engine is under active development.
+Windows and Linux are both stable with all modules working. Windows has a few extras (Dry-Run mode, state tracking, SHA-256 verified backups, 11 offline themes). macOS support is under active development.
 
 </details>
 
@@ -878,11 +879,11 @@ Windows. The Linux/macOS engine is under active development.
 
 ## 🧭 Roadmap
 
-- [ ] 🐧 Bring the Linux/macOS engine to full parity with Windows
-- [ ] 🧪 Dry-Run mode and state tracking for Linux/macOS
+- [ ] 🍎 Finish and stabilize macOS support
+- [ ] 🧪 Dry-Run mode and state tracking for Linux
 - [ ] 📄 Add a `LICENSE` file and tagged GitHub Releases
 - [ ] 🤖 CI with ShellCheck for Bash and PSScriptAnalyzer for PowerShell
-- [ ] 🎨 Ship the 11 themes locally on Linux/macOS as well
+- [ ] 🎨 Ship the 11 themes locally on Linux as well
 - [ ] 📸 Screenshot and demo GIF gallery
 
 ---
@@ -891,7 +892,7 @@ Windows. The Linux/macOS engine is under active development.
 
 ## 🤝 Contributing
 
-Contributions, bug reports and ideas are welcome, especially for the Linux/macOS engine.
+Contributions, bug reports and ideas are welcome, especially macOS testing and fixes.
 
 1. 🍴 **Fork** the repository and create a branch: `feature/your-idea` or `fix/your-bug`
 2. 🛡️ **Keep the safety contract:** config changes must be reversible (snapshot first, managed blocks, Dry-Run support where possible)
