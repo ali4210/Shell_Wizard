@@ -187,7 +187,7 @@ function Set-WindowsTerminalFont {
     }
 }
 
-# --- Module 1: Safety Backup / Rollback Engine v2 — Verified, Atomic, Manual-Only ---
+# --- Module 1: Safety Backup / Rollback Engine v2 - Verified, Atomic, Manual-Only ---
 
 function Get-FileHashSafe {
     param([string]$Path)
@@ -266,7 +266,7 @@ function New-ShellWizardBackup {
 
     foreach ($Item in $Targets) {
         if (-not (Test-Path -Path $Item.Source)) {
-            if (-not $Silent) { Write-Host "  [i] $($Item.Label) — not present, skipped" -ForegroundColor DarkGray }
+            if (-not $Silent) { Write-Host "  [i] $($Item.Label) - not present, skipped" -ForegroundColor DarkGray }
             continue
         }
 
@@ -286,7 +286,7 @@ function New-ShellWizardBackup {
 
     if (-not $AnyFileBackedUp) {
         if (-not $Silent) {
-            Write-Host "`n[!] Nothing to back up — no profile or settings found." -ForegroundColor Yellow
+            Write-Host "`n[!] Nothing to back up - no profile or settings found." -ForegroundColor Yellow
         }
         Remove-Item -Path $TargetDir -Recurse -Force -ErrorAction SilentlyContinue
         if (-not $Silent) { Pause-Console }
@@ -308,7 +308,7 @@ function New-ShellWizardBackup {
     if (-not $Silent) {
         Write-Host ""
         if ($AnyFailure) {
-            Write-Host "[PARTIAL] Backup completed with some failures — see above. Snapshot: $TargetDir" -ForegroundColor Yellow
+            Write-Host "[PARTIAL] Backup completed with some failures - see above. Snapshot: $TargetDir" -ForegroundColor Yellow
         } else {
             Write-Host "[OK] Backup snapshot verified and complete: $TargetDir" -ForegroundColor Green
         }
@@ -321,7 +321,7 @@ function Test-BackupManifest {
 
     $ManifestPath = Join-Path -Path $BackupPath -ChildPath "manifest.json"
     if (-not (Test-Path -Path $ManifestPath)) {
-        return @{ Valid = $false; Reason = "No manifest.json — legacy or corrupted snapshot"; Files = @() }
+        return @{ Valid = $false; Reason = "No manifest.json - legacy or corrupted snapshot"; Files = @() }
     }
 
     try {
@@ -393,7 +393,7 @@ function Restore-ShellWizardBackup {
         Write-Host "`n[!] WARNING: This backup failed integrity verification ($($Check.Reason))." -ForegroundColor Red
         $Force = Read-Host "Restore anyway at your own risk? (y/n)"
         if ($Force -ne 'y' -and $Force -ne 'Y') {
-            Write-Host "[i] Restore cancelled — backup was not trusted." -ForegroundColor Yellow
+            Write-Host "[i] Restore cancelled - backup was not trusted." -ForegroundColor Yellow
             Pause-Console
             return
         }
@@ -416,7 +416,7 @@ function Restore-ShellWizardBackup {
     foreach ($Item in $RestoreMap) {
         $Source = Join-Path -Path $SelectedBackup -ChildPath $Item.File
         if (-not (Test-Path -Path $Source)) {
-            Write-Host "  [i] $($Item.Label) — not in this snapshot, skipped" -ForegroundColor DarkGray
+            Write-Host "  [i] $($Item.Label) - not in this snapshot, skipped" -ForegroundColor DarkGray
             continue
         }
 
@@ -432,12 +432,12 @@ function Restore-ShellWizardBackup {
 
     Write-Host ""
     if ($AnyFailure) {
-        Write-Host "[PARTIAL] Rollback completed with failures — your pre-rollback state was saved separately." -ForegroundColor Yellow
+        Write-Host "[PARTIAL] Rollback completed with failures - your pre-rollback state was saved separately." -ForegroundColor Yellow
     } elseif ($AnyRestored) {
         Write-Host "[OK] Rollback complete and verified." -ForegroundColor Green
         Write-Host "[i] Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
     } else {
-        Write-Host "[!] Nothing was restored — snapshot may be empty." -ForegroundColor Yellow
+        Write-Host "[!] Nothing was restored - snapshot may be empty." -ForegroundColor Yellow
     }
     Pause-Console
 }
