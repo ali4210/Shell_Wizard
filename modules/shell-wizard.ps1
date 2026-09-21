@@ -5,6 +5,8 @@
 #               Managed Profile Blocks, Theme Live Previews, Dry-Run Mode & Global CLI Registration.
 # ==============================================================================
 
+param([string]$ApplyFontOnly)
+
 $Host.UI.RawUI.WindowTitle = "Shell-Wizard Ultimate - Gold Standard Engine"
 
 $ScriptDir = $PSScriptRoot
@@ -143,9 +145,9 @@ function Write-ManagedProfile {
 }
 
 # --- Autonomous Windows Terminal Font Injector ---
-function Set-WindowsTerminalFont {
+function Apply-WindowsTerminalFontNow {
     param (
-        [string]$ExactFontName = "CaskaydiaCove Nerd Font"
+        [string]$ExactFontName = "CaskaydiaCove NF"
     )
 
     $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
@@ -155,35 +157,84 @@ function Set-WindowsTerminalFont {
         return
     }
 
-    Write-Host "--> Configuring Windows Terminal autonomously for font face: '$ExactFontName'..." -ForegroundColor Cyan
+    Write-Host "--> Configuring Windows Terminal for font face: '$ExactFontName'..." -ForegroundColor Cyan
 
-    if (Test-Path -Path $WTConfigPath) {
-        try {
-            $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-            $BackupWT = "$WTConfigPath.bak_$TimeStamp"
-            Copy-Item -Path $WTConfigPath -Destination $BackupWT -Force
-
-            $JsonRaw = Get-Content -Path $WTConfigPath -Raw | ConvertFrom-Json
-            
-            if (-not $JsonRaw.profiles.defaults) {
-                $JsonRaw.profiles | Add-Member -MemberType NoteProperty -Name "defaults" -Value ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
-            }
-
-            if (-not $JsonRaw.profiles.defaults.font) {
-                $JsonRaw.profiles.defaults | Add-Member -MemberType NoteProperty -Name "font" -Value ([PSCustomObject]@{ "face" = $ExactFontName }) -ErrorAction SilentlyContinue
-            } else {
-                $JsonRaw.profiles.defaults.font.face = $ExactFontName
-            }
-
-            $JsonRaw | ConvertTo-Json -Depth 32 | Set-Content -Path $WTConfigPath -Encoding UTF8
-            Save-ShellWizardState -Font $ExactFontName
-            Write-Host "[OK] Windows Terminal font updated to '$ExactFontName' autonomously!" -ForegroundColor Green
-            Write-Host "[i] IMPORTANT: Restart your Windows Terminal window to apply font rendering!" -ForegroundColor Yellow
-        } catch {
-            Write-Host "[!] Could not modify Windows Terminal settings automatically." -ForegroundColor Yellow
-        }
-    } else {
+    if (-not (Test-Path -Path $WTConfigPath)) {
         Write-Host "[!] Windows Terminal settings file not found (standard PowerShell host in use)." -ForegroundColor Yellow
+        return
+    }
+
+    $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $BackupWT = "$WTConfigPath.bak_$TimeStamp"
+    try {
+        Copy-Item -Path $WTConfigPath -Destination $BackupWT -Force -ErrorAction Stop
+
+        $Text = [IO.File]::ReadAllText($WTConfigPath)
+        $FontJson = '"font": { "face": "' + $ExactFontName + '" }'
+        $Face = '("defaults"\s*:\s*\{[^{}]*"font"\s*:\s*\{\s*"face"\s*:\s*")[^"]*(")'
+
+        if ($Text -match $Face) {
+            $New = [regex]::Replace($Text, $Face, ('${1}' + $ExactFontName + '${2}'), 1)
+        } elseif ($Text -match '"defaults"\s*:\s*\{\s*\}') {
+            $New = [regex]::Replace($Text, '"defaults"\s*:\s*\{\s*\}', ('"defaults": { ' + $FontJson + ' }'), 1)
+        } elseif ($Text -match '"defaults"\s*:\s*\{') {
+            $New = [regex]::Replace($Text, '("defaults"\s*:\s*\{)', ('${1} ' + $FontJson + ','), 1)
+        } else {
+            throw "No profiles.defaults section found; settings left untouched."
+        }
+
+        $null = $New | ConvertFrom-Json
+        [IO.File]::WriteAllText($WTConfigPath, $New, (New-Object Text.UTF8Encoding $false))
+        Save-ShellWizardState -Font $ExactFontName
+        Write-Host "[OK] Windows Terminal font updated to '$ExactFontName'." -ForegroundColor Green
+        Write-Host "[i] Restart Windows Terminal to apply it. A backup was saved: $BackupWT" -ForegroundColor Yellow
+    } catch {
+        if (Test-Path $BackupWT) {
+            Copy-Item -Path $BackupWT -Destination $WTConfigPath -Force -ErrorAction SilentlyContinue
+        }
+        Write-Host "[!] Could not change the font safely; your original settings were restored." -ForegroundColor Yellow
+        Write-Host "    Set it by hand: Settings > Defaults > Appearance > Font face: $ExactFontName" -ForegroundColor DarkGray
+    }
+}
+
+# --- Font setter: never edits settings.json while Terminal is running ---
+function Set-WindowsTerminalFont {
+    param (
+        [string]$ExactFontName = "CaskaydiaCove NF"
+    )
+    $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    if ($global:ShellWizardDryRun) {
+        Write-Host "`n[DRY-RUN] Would set Windows Terminal font face to: '$ExactFontName'" -ForegroundColor Yellow
+        return
+    }
+    if (-not (Test-Path -Path $WTConfigPath)) {
+        Write-Host "[!] Windows Terminal settings file not found." -ForegroundColor Yellow
+        return
+    }
+    $BackupWT = "$WTConfigPath.bak_" + (Get-Date -Format "yyyyMMdd_HHmmss")
+    try {
+        Copy-Item -Path $WTConfigPath -Destination $BackupWT -Force -ErrorAction Stop
+        $Text = [IO.File]::ReadAllText($WTConfigPath)
+        $FontJson = '"font": { "face": "' + $ExactFontName + '" }'
+        $Face = '("defaults"\s*:\s*\{[^{}]*"font"\s*:\s*\{\s*"face"\s*:\s*")[^"]*(")'
+        if ($Text -match $Face) {
+            $New = [regex]::Replace($Text, $Face, ('${1}' + $ExactFontName + '${2}'), 1)
+        } elseif ($Text -match '"defaults"\s*:\s*\{\s*\}') {
+            $New = [regex]::Replace($Text, '"defaults"\s*:\s*\{\s*\}', ('"defaults": { ' + $FontJson + ' }'), 1)
+        } elseif ($Text -match '"defaults"\s*:\s*\{') {
+            $New = [regex]::Replace($Text, '("defaults"\s*:\s*\{)', ('${1} ' + $FontJson + ','), 1)
+        } else {
+            throw "No profiles.defaults section found."
+        }
+        if ($New -ne $Text) {
+            $null = $New | ConvertFrom-Json
+            [IO.File]::WriteAllText($WTConfigPath, $New, (New-Object Text.UTF8Encoding $false))
+        }
+        Save-ShellWizardState -Font $ExactFontName
+        Write-Host "[OK] Terminal font set to '$ExactFontName'. Backup: $BackupWT" -ForegroundColor Green
+    } catch {
+        if (Test-Path $BackupWT) { Copy-Item $BackupWT $WTConfigPath -Force -ErrorAction SilentlyContinue }
+        Write-Host "[!] Font not changed; original restored. Set it in Settings > Defaults > Appearance." -ForegroundColor Yellow
     }
 }
 
@@ -469,7 +520,8 @@ function Install-WindowsBeautifier {
 
     Write-Host ""
     Write-Host "--> Registering CascadiaCode Nerd Font into Windows Font Engine..." -ForegroundColor Cyan
-    oh-my-posh font install CascadiaCode
+    $HasCascadia = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "CaskaydiaCove NF *" }
+    if ($HasCascadia) { Write-Host "[OK] CascadiaCode Nerd Font already installed. Skipping." -ForegroundColor Green } else { oh-my-posh font install CascadiaCode }
 
     Write-Host ""
     Write-Host "--> Installing Terminal-Icons and PSReadLine modules..." -ForegroundColor Cyan
@@ -492,7 +544,7 @@ function Install-WindowsBeautifier {
     )
 
     Write-ManagedProfile -ConfigLines $ConfigLines
-    Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove Nerd Font"
+    Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove NF"
     Save-ShellWizardState -Engine "Oh My Posh" -Theme "Jebree" -Font "CaskaydiaCove Nerd Font"
 
     Write-Host ""
@@ -741,7 +793,7 @@ function Font-Studio-Engine {
         "1" {
             Write-Host "`n--> Registering CascadiaCode Nerd Font into Windows..." -ForegroundColor Cyan
             if (-not $global:ShellWizardDryRun) { oh-my-posh font install CascadiaCode }
-            Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove Nerd Font"
+            Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove NF"
             Pause-Console
         }
         "2" {
@@ -809,6 +861,18 @@ function Enable-GlobalCliAccess {
     }
 
     Pause-Console
+}
+
+# --- Helper mode: wait for Terminal to close, then apply the font ---
+if ($ApplyFontOnly) {
+    $Waited = 0
+    while ((Get-Process -Name WindowsTerminal -ErrorAction SilentlyContinue) -and $Waited -lt 900) {
+        Start-Sleep -Seconds 2
+        $Waited += 2
+    }
+    Start-Sleep -Seconds 2
+    Apply-WindowsTerminalFontNow -ExactFontName $ApplyFontOnly
+    exit
 }
 
 # --- Main Application Loop ---
