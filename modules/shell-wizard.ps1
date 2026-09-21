@@ -734,6 +734,7 @@ function Set-CliToolSuite {
     Write-Host ""
 
     $InstalledList = @()
+    $FailedList = @()
 
     foreach ($Tool in $Tools) {
         $Installed = Get-Command -Name $Tool.Cmd -ErrorAction SilentlyContinue
@@ -761,14 +762,31 @@ function Set-CliToolSuite {
             } else {
                 Write-Host "  [MISSING]   $($Tool.Name) -> Installing via Winget..." -ForegroundColor Yellow
                 winget install $Tool.Id -s winget --accept-source-agreements --accept-package-agreements | Out-Null
-                $InstalledList += $Tool.Name
+                $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+                $Check = Get-Command -Name $Tool.Cmd -ErrorAction SilentlyContinue
+                if (-not $Check -and $Tool.AltCmd) { $Check = Get-Command -Name $Tool.AltCmd -ErrorAction SilentlyContinue }
+                if (-not $Check) {
+                    $LinkPath = Join-Path -Path $env:LOCALAPPDATA -ChildPath "Microsoft\WinGet\Links\$($Tool.Cmd).exe"
+                    if (Test-Path -Path $LinkPath) { $Check = Get-Item -Path $LinkPath }
+                }
+                if ($Check) {
+                    Write-Host "  [OK]        $($Tool.Name) installed." -ForegroundColor Green
+                    $InstalledList += $Tool.Name
+                } else {
+                    Write-Host "  [FAILED]    $($Tool.Name) not found after install. Open a new window or run winget manually." -ForegroundColor Red
+                    $FailedList += $Tool.Name
+                }
             }
         }
     }
 
     Save-ShellWizardState -InstalledTools $InstalledList
     Write-Host ""
-    Write-Host "[OK] All modern CLI tools verified and updated in state file!" -ForegroundColor Green
+    if ($FailedList.Count -gt 0) {
+        Write-Host "[!] Some tools failed: $($FailedList -join ', '). Re-run this option after opening a new window." -ForegroundColor Yellow
+    } else {
+        Write-Host "[OK] All modern CLI tools verified in state file!" -ForegroundColor Green
+    }
     Pause-Console
 }
 
