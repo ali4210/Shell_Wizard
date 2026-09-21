@@ -5,24 +5,16 @@ TITLE Shell-Wizard Ultimate - Master OS Gateway
 :: Force working directory lock
 cd /d "%~dp0"
 
-:: --- ADMINISTRATOR PRIVILEGE CHECK WITH PAUSE ---
+:: --- AUTO-ELEVATE (shows the UAC Yes/No prompt) ---
 net session >nul 2>&1
 if %errorLevel% neq 0 (
-    color 0C
-    cls
-    echo ====================================================================
-    echo  [!] ADMINISTRATOR PRIVILEGES REQUIRED
-    echo ====================================================================
-    echo.
-    echo  Shell-Wizard requires Admin rights to install CLI tools and fonts.
-    echo.
-    echo  Please close this window, RIGHT-CLICK 'autorun.bat', 
-    echo  and select "Run as administrator".
-    echo.
-    echo ====================================================================
-    echo.
-    pause
-    exit /b 1
+    echo [i] Requesting Administrator privileges...
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs" 2>nul
+    if errorlevel 1 (
+        echo [!] Administrator access was denied. Shell-Wizard needs it to install tools and fonts.
+        pause
+    )
+    exit /b
 )
 color 07
 
@@ -31,13 +23,13 @@ cls
 
 :: Native Batch Banner Reading
 if exist "%~dp0banner_wrapper.txt" (
-    type "%~dp0banner_wrapper.txt"
+type "%~dp0banner_wrapper.txt"
 ) else if exist "%~dp0modules\banner_wrapper.txt" (
-    type "%~dp0modules\banner_wrapper.txt"
+type "%~dp0modules\banner_wrapper.txt"
 ) else if exist "%~dp0modules\banner.txt" (
-    type "%~dp0modules\banner.txt"
+type "%~dp0modules\banner.txt"
 ) else if exist "%~dp0banner.txt" (
-    type "%~dp0banner.txt"
+type "%~dp0banner.txt"
 )
 
 echo.
@@ -107,9 +99,9 @@ echo.
 cd /d "%~dp0"
 
 if not exist "%~dp0modules\shell-wizard.ps1" (
-    echo [!] CRITICAL ERROR: Could not find '%~dp0modules\shell-wizard.ps1'
-    pause
-    goto menu
+echo [!] CRITICAL ERROR: Could not find '%~dp0modules\shell-wizard.ps1'
+pause
+goto menu
 )
 
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0modules\shell-wizard.ps1"
