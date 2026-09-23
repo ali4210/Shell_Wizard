@@ -54,15 +54,11 @@ Built for developers, sysadmins, DevOps and security engineers who live in the t
 </table>
 
 > [!TIP]
-> **In 30 seconds:** clone the repo, run `./autorun.sh` (Linux/macOS) or right-click `autorun.bat` → *Run as administrator* (Windows), then drive everything from numbered menus. Take a backup snapshot first, and you can always roll back.
-
-> [!IMPORTANT]
-> **First time here?** Launch once in first-run mode before anything else:
+> **First run:**
+> - 🐧 **Linux/macOS:** `./autorun.sh -f` or `./autorun.sh --hard`
+> - 🪟 **Windows:** right-click `autorun.bat` → *Run as administrator*, or run `.\autorun.ps1`. Launching from an elevated terminal instead? Use `autorun.bat -f` or `autorun.bat --hard`.
 >
-> ```bash
-> ./autorun.sh --hard      # or the short form:  ./autorun.sh -f
-> ```
->
+> The wrapper self-provisions a Go toolchain if it can't find one, compiles the binary, and launches it elevated — automatically. After the first run, plain `./autorun.sh` or `autorun.bat` is enough.
 > After that, launch normally with `./autorun.sh`. On Windows, use **`autorun.bat`** as Administrator.
 
 ---
