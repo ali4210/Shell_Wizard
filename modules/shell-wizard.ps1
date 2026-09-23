@@ -106,6 +106,14 @@ function Pause-Console {
     Read-Host "Press [ENTER] to return to menu..."
 }
 
+# --- Syntax validator: confirms a string is parseable PowerShell before it's ever saved ---
+function Test-PowerShellSyntax {
+    param([string]$Code)
+    $parseErrors = $null
+    [System.Management.Automation.Language.Parser]::ParseInput($Code, [ref]$null, [ref]$parseErrors) | Out-Null
+    return @{ Valid = ($parseErrors.Count -eq 0); Errors = $parseErrors }
+}
+
 # --- Unified Managed Profile Writer ---
 function Write-ManagedProfile {
     param (
@@ -123,6 +131,7 @@ function Write-ManagedProfile {
         return
     }
 
+    # $PROFILE is only read at shell startup, so it's safe to write while Terminal is open.
     if (-not (Test-Path -Path $PROFILE)) {
         $ProfileDir = Split-Path -Parent $PROFILE
         if (-not (Test-Path -Path $ProfileDir)) {
@@ -139,6 +148,24 @@ function Write-ManagedProfile {
     } else {
         $UpdatedContent = "$ExistingContent`n`n$NewBlock".Trim()
     }
+
+    $SyntaxCheck = Test-PowerShellSyntax -Code $UpdatedContent
+    if (-not $SyntaxCheck.Valid) {
+        Write-Host "[!] ABORTED: the updated profile would fail to parse - your existing `$PROFILE was left untouched." -ForegroundColor Red
+        Write-Host "    Parse errors detected:" -ForegroundColor Yellow
+        $SyntaxCheck.Errors | ForEach-Object { Write-Host "      - $($_.Message) (line $($_.Extent.StartLineNumber))" -ForegroundColor Yellow }
+        Write-Host "    Your profile currently in use is unchanged and safe." -ForegroundColor Cyan
+        return
+    }
+
+    if ($UpdatedContent -match "Import-Module posh-git" -and $UpdatedContent -match "oh-my-posh init pwsh") {
+        Write-Host "[!] ABORTED: both posh-git and oh-my-posh would load together - this can hang the console." -ForegroundColor Red
+        Write-Host "    Pick only one prompt engine at a time. Your existing `$PROFILE was left untouched." -ForegroundColor Yellow
+        return
+    }
+
+    $BackupPath = "$PROFILE.wizard_prewrite_bak"
+    Copy-Item -Path $PROFILE -Destination $BackupPath -Force -ErrorAction SilentlyContinue
 
     Set-Content -Path $PROFILE -Value $UpdatedContent -Encoding UTF8
     Write-Host "[OK] Managed profile block updated cleanly in `$PROFILE!" -ForegroundColor Green
@@ -185,9 +212,42 @@ function Apply-WindowsTerminalFontNow {
 
         $null = $New | ConvertFrom-Json
         [IO.File]::WriteAllText($WTConfigPath, $New, (New-Object Text.UTF8Encoding $false))
-        Save-ShellWizardState -Font $ExactFontName
-        Write-Host "[OK] Windows Terminal font updated to '$ExactFontName'." -ForegroundColor Green
-        Write-Host "[i] Restart Windows Terminal to apply it. A backup was saved: $BackupWT" -ForegroundColor Yellow
+
+        Write-Host "--> Verifying Windows Terminal can actually launch with this font..." -ForegroundColor Cyan
+
+        $ExistingWT = Get-Process -Name WindowsTerminal -ErrorAction SilentlyContinue
+        $Survived = $false
+
+        if ($ExistingWT) {
+            # Windows Terminal is already running (single-instance mode) - wt.exe will just
+            # hand off a new tab to it rather than starting a new process we can watch.
+            # So we watch the EXISTING WindowsTerminal.exe process itself: if the font we
+            # just wrote is bad, the existing window crashes too when it repaints/reloads.
+            Start-Process -FilePath "wt.exe" -WindowStyle Minimized -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 3
+            $StillRunning = Get-Process -Id $ExistingWT.Id -ErrorAction SilentlyContinue
+            $Survived = [bool]$StillRunning
+        } else {
+            # No existing instance - launch a fresh one and watch the real WindowsTerminal.exe,
+            # not the thin wt.exe launcher stub (which always exits almost immediately).
+            Start-Process -FilePath "wt.exe" -WindowStyle Minimized -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 3
+            $NewWT = Get-Process -Name WindowsTerminal -ErrorAction SilentlyContinue
+            if ($NewWT) {
+                $Survived = $true
+                Stop-Process -Id $NewWT.Id -Force -ErrorAction SilentlyContinue
+            }
+        }
+
+        if ($Survived) {
+            Save-ShellWizardState -Font $ExactFontName
+            Write-Host "[OK] Windows Terminal font updated and verified working: '$ExactFontName'." -ForegroundColor Green
+        } else {
+            Copy-Item -Path $BackupWT -Destination $WTConfigPath -Force -ErrorAction SilentlyContinue
+            Write-Host "[!] '$ExactFontName' crashed Windows Terminal on launch - this is a known rendering issue with some fonts on some systems, not a problem with the tool." -ForegroundColor Red
+            Write-Host "[i] Your previous working settings were automatically restored." -ForegroundColor Yellow
+            Write-Host "[i] Try a different font, or run: Stop-Service FontCache -Force; Remove-Item `"`$env:LOCALAPPDATA\FontCache\*`" -Force -Recurse; Start-Service FontCache" -ForegroundColor Cyan
+        }
     } catch {
         if (Test-Path $BackupWT) {
             Copy-Item -Path $BackupWT -Destination $WTConfigPath -Force -ErrorAction SilentlyContinue
@@ -197,45 +257,69 @@ function Apply-WindowsTerminalFontNow {
     }
 }
 
-# --- Font setter: never edits settings.json while Terminal is running ---
+# --- Resolves a short font family name to its exact installed face name, installing it first if missing ---
+function Get-NerdFontFace {
+    param([string]$ShortName)
+
+    switch ($ShortName) {
+        "CascadiaCode" {
+            if (-not $global:ShellWizardDryRun) {
+                $Has = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "CaskaydiaCove NF *" }
+                if (-not $Has) {
+                    Write-Host "--> Installing CascadiaCode Nerd Font for this engine..." -ForegroundColor Cyan
+                    oh-my-posh font install CascadiaCode
+                }
+            }
+            return "CaskaydiaCove NF"
+        }
+        "JetBrainsMono" {
+            if (-not $global:ShellWizardDryRun) {
+                $Has = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "JetBrainsMono N*" }
+                if (-not $Has) {
+                    Write-Host "--> Installing JetBrainsMono Nerd Font for this engine..." -ForegroundColor Cyan
+                    oh-my-posh font install JetBrainsMono
+                }
+            }
+            $InstalledFonts = @()
+            $InstalledFonts += (Get-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).Property
+            $InstalledFonts += (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name
+            if ($InstalledFonts | Where-Object { $_ -like "JetBrainsMono NF *" }) {
+                return "JetBrainsMono NF"
+            } elseif ($InstalledFonts | Where-Object { $_ -like "JetBrainsMono NFM *" }) {
+                return "JetBrainsMono NFM"
+            } else {
+                return "JetBrainsMono Nerd Font"
+            }
+        }
+        "FiraCode" {
+            if (-not $global:ShellWizardDryRun) {
+                $Has = (Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "FiraCode Nerd Font *" }
+                if (-not $Has) {
+                    Write-Host "--> Installing FiraCode Nerd Font for this engine..." -ForegroundColor Cyan
+                    oh-my-posh font install FiraCode
+                }
+            }
+            return "FiraCode Nerd Font"
+        }
+        default {
+            return "Cascadia Mono"
+        }
+    }
+}
+
+# --- Font setter: writes immediately - Windows Terminal hot-reloads settings.json live ---
 function Set-WindowsTerminalFont {
     param (
         [string]$ExactFontName = "CaskaydiaCove NF"
     )
-    $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+
     if ($global:ShellWizardDryRun) {
         Write-Host "`n[DRY-RUN] Would set Windows Terminal font face to: '$ExactFontName'" -ForegroundColor Yellow
         return
     }
-    if (-not (Test-Path -Path $WTConfigPath)) {
-        Write-Host "[!] Windows Terminal settings file not found." -ForegroundColor Yellow
-        return
-    }
-    $BackupWT = "$WTConfigPath.bak_" + (Get-Date -Format "yyyyMMdd_HHmmss")
-    try {
-        Copy-Item -Path $WTConfigPath -Destination $BackupWT -Force -ErrorAction Stop
-        $Text = [IO.File]::ReadAllText($WTConfigPath)
-        $FontJson = '"font": { "face": "' + $ExactFontName + '" }'
-        $Face = '("defaults"\s*:\s*\{[^{}]*"font"\s*:\s*\{\s*"face"\s*:\s*")[^"]*(")'
-        if ($Text -match $Face) {
-            $New = [regex]::Replace($Text, $Face, ('${1}' + $ExactFontName + '${2}'), 1)
-        } elseif ($Text -match '"defaults"\s*:\s*\{\s*\}') {
-            $New = [regex]::Replace($Text, '"defaults"\s*:\s*\{\s*\}', ('"defaults": { ' + $FontJson + ' }'), 1)
-        } elseif ($Text -match '"defaults"\s*:\s*\{') {
-            $New = [regex]::Replace($Text, '("defaults"\s*:\s*\{)', ('${1} ' + $FontJson + ','), 1)
-        } else {
-            throw "No profiles.defaults section found."
-        }
-        if ($New -ne $Text) {
-            $null = $New | ConvertFrom-Json
-            [IO.File]::WriteAllText($WTConfigPath, $New, (New-Object Text.UTF8Encoding $false))
-        }
-        Save-ShellWizardState -Font $ExactFontName
-        Write-Host "[OK] Terminal font set to '$ExactFontName'. Backup: $BackupWT" -ForegroundColor Green
-    } catch {
-        if (Test-Path $BackupWT) { Copy-Item $BackupWT $WTConfigPath -Force -ErrorAction SilentlyContinue }
-        Write-Host "[!] Font not changed; original restored. Set it in Settings > Defaults > Appearance." -ForegroundColor Yellow
-    }
+
+    Apply-WindowsTerminalFontNow -ExactFontName $ExactFontName
+    Write-Host "[i] Open a new tab to see the font change - no restart needed." -ForegroundColor Cyan
 }
 
 # --- Module 1: Safety Backup / Rollback Engine v2 - Verified, Atomic, Manual-Only ---
@@ -306,9 +390,11 @@ function New-ShellWizardBackup {
     New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
 
     $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $StarshipConfigPath = Join-Path -Path $HOME -ChildPath ".config\starship.toml"
     $Targets = @(
         @{ Label = "PowerShell Profile"; Source = $PROFILE; DestName = "Microsoft.PowerShell_profile.ps1" },
-        @{ Label = "Windows Terminal Settings"; Source = $WTConfigPath; DestName = "settings.json" }
+        @{ Label = "Windows Terminal Settings"; Source = $WTConfigPath; DestName = "settings.json" },
+        @{ Label = "Starship Config"; Source = $StarshipConfigPath; DestName = "starship.toml" }
     )
 
     $Manifest = @{ CreatedAt = (Get-Date -Format "yyyy-MM-dd HH:mm:ss"); Files = @() }
@@ -456,9 +542,11 @@ function Restore-ShellWizardBackup {
     New-ShellWizardBackup -Silent
 
     $WTConfigPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $StarshipConfigPath = Join-Path -Path $HOME -ChildPath ".config\starship.toml"
     $RestoreMap = @(
         @{ Label = "PowerShell Profile"; File = "Microsoft.PowerShell_profile.ps1"; Dest = $PROFILE },
-        @{ Label = "Windows Terminal Settings"; File = "settings.json"; Dest = $WTConfigPath }
+        @{ Label = "Windows Terminal Settings"; File = "settings.json"; Dest = $WTConfigPath },
+        @{ Label = "Starship Config"; File = "starship.toml"; Dest = $StarshipConfigPath }
     )
 
     $AnyRestored = $false
@@ -514,9 +602,17 @@ function Backup-And-Rollback-Engine {
 
 # --- Module 2: 1-Click Supercharge ---
 function Install-WindowsBeautifier {
+    $Policy = Get-ExecutionPolicy -Scope CurrentUser
+    if ($Policy -eq "Restricted") {
+        Write-Host "[!] Execution policy is Restricted - profiles won't run. Fixing..." -ForegroundColor Yellow
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        Write-Host "[OK] Set to RemoteSigned for CurrentUser." -ForegroundColor Green
+    }
+
     Write-Host ""
     Write-Host "--> Installing Oh My Posh theme engine..." -ForegroundColor Cyan
     winget install JanDeDobbeleer.OhMyPosh -s winget --accept-source-agreements --accept-package-agreements
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
     Write-Host ""
     Write-Host "--> Registering CascadiaCode Nerd Font into Windows Font Engine..." -ForegroundColor Cyan
@@ -540,16 +636,17 @@ function Install-WindowsBeautifier {
         "Import-Module Terminal-Icons -ErrorAction SilentlyContinue",
         "Import-Module PSReadLine -ErrorAction SilentlyContinue",
         "Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue",
-        "oh-my-posh init pwsh --config '$DefaultThemePath' | Invoke-Expression"
+        "try { if (Get-Command oh-my-posh -ErrorAction Stop) { oh-my-posh init pwsh --config '$DefaultThemePath' | Invoke-Expression } } catch { Write-Host '[shell-wizard] Theme failed to load, using default prompt.' -ForegroundColor Yellow }"
     )
 
     Write-ManagedProfile -ConfigLines $ConfigLines
-    Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove NF"
-    Save-ShellWizardState -Engine "Oh My Posh" -Theme "Jebree" -Font "CaskaydiaCove Nerd Font"
+    $ExactFont = Get-NerdFontFace -ShortName "CascadiaCode"
+    Set-WindowsTerminalFont -ExactFontName $ExactFont
+    Save-ShellWizardState -Engine "Oh My Posh" -Theme "Jebree" -Font $ExactFont
 
     Write-Host ""
     Write-Host "[OK] WINDOWS POWERSHELL SUPERCHARGE COMPLETE!" -ForegroundColor Green
-    Write-Host "Restart your PowerShell window or run: . `$PROFILE" -ForegroundColor Cyan
+    Write-Host "[i] Close and reopen Windows Terminal (or use menu option 8) to see it." -ForegroundColor Cyan
     Pause-Console
 }
 
@@ -576,19 +673,20 @@ function Switch-PowerShellThemes {
     $ThemeChoice = Read-Host "Select theme choice [0-11]"
     $ThemeFileName = ""
     $ThemeName = ""
+    $FontFamily = ""
 
     switch ($ThemeChoice) {
-        "1"  { $ThemeFileName = "jebree.omp.json"; $ThemeName = "Jebree" }
-        "2"  { $ThemeFileName = "paradox.omp.json"; $ThemeName = "Paradox" }
-        "3"  { $ThemeFileName = "agnoster.omp.json"; $ThemeName = "Agnoster" }
-        "4"  { $ThemeFileName = "bubbles.omp.json"; $ThemeName = "Bubbles" }
-        "5"  { $ThemeFileName = "dracula.omp.json"; $ThemeName = "Dracula" }
-        "6"  { $ThemeFileName = "blueish.omp.json"; $ThemeName = "Blueish" }
-        "7"  { $ThemeFileName = "tokyonight.omp.json"; $ThemeName = "Tokyo Night" }
-        "8"  { $ThemeFileName = "catppuccin.omp.json"; $ThemeName = "Catppuccin Mocha" }
-        "9"  { $ThemeFileName = "gruvbox.omp.json"; $ThemeName = "Gruvbox" }
-        "10" { $ThemeFileName = "nord.omp.json"; $ThemeName = "Nord" }
-        "11" { $ThemeFileName = "rosepine.omp.json"; $ThemeName = "Rose Pine" }
+        "1"  { $ThemeFileName = "jebree.omp.json"; $ThemeName = "Jebree"; $FontFamily = "CascadiaCode" }
+        "2"  { $ThemeFileName = "paradox.omp.json"; $ThemeName = "Paradox"; $FontFamily = "CascadiaCode" }
+        "3"  { $ThemeFileName = "agnoster.omp.json"; $ThemeName = "Agnoster"; $FontFamily = "JetBrainsMono" }
+        "4"  { $ThemeFileName = "bubbles.omp.json"; $ThemeName = "Bubbles"; $FontFamily = "JetBrainsMono" }
+        "5"  { $ThemeFileName = "dracula.omp.json"; $ThemeName = "Dracula"; $FontFamily = "FiraCode" }
+        "6"  { $ThemeFileName = "blueish.omp.json"; $ThemeName = "Blueish"; $FontFamily = "CascadiaCode" }
+        "7"  { $ThemeFileName = "tokyonight.omp.json"; $ThemeName = "Tokyo Night"; $FontFamily = "JetBrainsMono" }
+        "8"  { $ThemeFileName = "catppuccin.omp.json"; $ThemeName = "Catppuccin Mocha"; $FontFamily = "FiraCode" }
+        "9"  { $ThemeFileName = "gruvbox.omp.json"; $ThemeName = "Gruvbox"; $FontFamily = "JetBrainsMono" }
+        "10" { $ThemeFileName = "nord.omp.json"; $ThemeName = "Nord"; $FontFamily = "CascadiaCode" }
+        "11" { $ThemeFileName = "rosepine.omp.json"; $ThemeName = "Rose Pine"; $FontFamily = "FiraCode" }
         "0" { return }
         default { Write-Host "Invalid selection!" -ForegroundColor Red; Start-Sleep -Seconds 1; return }
     }
@@ -621,15 +719,18 @@ function Switch-PowerShellThemes {
         "Import-Module Terminal-Icons -ErrorAction SilentlyContinue",
         "Import-Module PSReadLine -ErrorAction SilentlyContinue",
         "Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue",
-        "oh-my-posh init pwsh --config '$TargetThemePath' | Invoke-Expression"
+        "try { if (Get-Command oh-my-posh -ErrorAction Stop) { oh-my-posh init pwsh --config '$TargetThemePath' | Invoke-Expression } } catch { Write-Host '[shell-wizard] Theme failed to load, using default prompt.' -ForegroundColor Yellow }"
     )
 
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
     Write-ManagedProfile -ConfigLines $ConfigLines
-    Save-ShellWizardState -Engine "Oh My Posh" -Theme $ThemeName
+    $ExactFont = Get-NerdFontFace -ShortName $FontFamily
+    Set-WindowsTerminalFont -ExactFontName $ExactFont
+    Save-ShellWizardState -Engine "Oh My Posh" -Theme $ThemeName -Font $ExactFont
 
     Write-Host ""
     Write-Host "[OK] Theme updated cleanly to '$ThemeName' in Managed Profile Block!" -ForegroundColor Green
-    Write-Host "Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
+    Write-Host "[i] Close and reopen Windows Terminal (or use menu option 8) to see it." -ForegroundColor Cyan
     Pause-Console
 }
 
@@ -654,18 +755,118 @@ function Standalone-Prompt-Engine {
             Write-Host "`n--> Ensuring Starship is installed via Winget..." -ForegroundColor Cyan
             if (-not $global:ShellWizardDryRun) {
                 winget install Starship.Starship -s winget --accept-source-agreements --accept-package-agreements
+                $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+            }
+
+            $StarshipConfigDir = Join-Path -Path $HOME -ChildPath ".config"
+            $StarshipConfigFile = Join-Path -Path $StarshipConfigDir -ChildPath "starship.toml"
+            New-Item -ItemType Directory -Force -Path $StarshipConfigDir | Out-Null
+
+            Write-Host ""
+            Write-Host "STARSHIP PRESET SELECTOR" -ForegroundColor Yellow
+            Write-Host "  [1] Nerd Font Symbols (Recommended - Icon Rich)" -ForegroundColor Green
+            Write-Host "  [2] Plain Text Symbols (No Nerd Font Needed)" -ForegroundColor Green
+            Write-Host "  [3] Bracketed Segments (Clean Minimal Brackets)" -ForegroundColor Green
+            Write-Host "  [4] Pastel Powerline (Segmented Pastel Aesthetic)" -ForegroundColor Green
+            Write-Host "  [5] Tokyo Night (Pastel Neon Dark Aesthetic)" -ForegroundColor Green
+            Write-Host "  [6] Gruvbox Rainbow (Warm Retro Palette)" -ForegroundColor Green
+            Write-Host "  [7] Jetpack (Compact Two-Line Prompt)" -ForegroundColor Green
+            Write-Host "  [0] Cancel" -ForegroundColor Green
+            Write-Host ""
+            $PresetChoice = Read-Host "Select preset [0-7]"
+
+            $PresetName = ""
+            $PresetLabel = ""
+            $NeedsNerdFont = $true
+
+            switch ($PresetChoice) {
+                "1" { $PresetName = "nerd-font-symbols";   $PresetLabel = "Nerd Font Symbols" }
+                "2" { $PresetName = "plain-text-symbols";  $PresetLabel = "Plain Text Symbols"; $NeedsNerdFont = $false }
+                "3" { $PresetName = "bracketed-segments";  $PresetLabel = "Bracketed Segments" }
+                "4" { $PresetName = "pastel-powerline";    $PresetLabel = "Pastel Powerline" }
+                "5" { $PresetName = "tokyo-night";         $PresetLabel = "Tokyo Night" }
+                "6" { $PresetName = "gruvbox-rainbow";     $PresetLabel = "Gruvbox Rainbow" }
+                "7" { $PresetName = "jetpack";              $PresetLabel = "Jetpack" }
+                "0" { return }
+                default { Write-Host "Invalid selection!" -ForegroundColor Red; Start-Sleep -Seconds 1; return }
+            }
+
+            if (-not $global:ShellWizardDryRun) {
+                $StarshipCmd = Get-Command starship -ErrorAction SilentlyContinue
+                if (-not $StarshipCmd) {
+                    Write-Host "[!] 'starship' is not resolvable in this session yet." -ForegroundColor Red
+                    Write-Host "    Close and reopen this terminal once, then re-run this option to write the preset." -ForegroundColor Yellow
+                    Pause-Console
+                    return
+                }
+
+                # --- Live Preview (rendered to a temp file so we never touch the real config until confirmed) ---
+                $PreviewFile = Join-Path -Path $StarshipConfigDir -ChildPath "starship.preview.toml"
+                try {
+                    starship preset $PresetName -o $PreviewFile --force 2>&1 | Out-Null
+                    if ($LASTEXITCODE -ne 0) { throw "starship preset exited with code $LASTEXITCODE" }
+
+                    Write-Host "`n--- [LIVE PREVIEW: $PresetLabel] ---" -ForegroundColor Cyan
+                    $Env:STARSHIP_CONFIG = $PreviewFile
+                    try { & starship prompt } catch { Write-Host "  ($PresetLabel Preview Rendering)" -ForegroundColor Yellow }
+                    Remove-Item Env:STARSHIP_CONFIG -ErrorAction SilentlyContinue
+                    Write-Host "`n-------------------------------------" -ForegroundColor Cyan
+                } catch {
+                    Write-Host "[!] Could not generate preview: $($_.Exception.Message)" -ForegroundColor Red
+                    Remove-Item -Path $PreviewFile -Force -ErrorAction SilentlyContinue
+                    Pause-Console
+                    return
+                }
+
+                $Confirm = Read-Host "`nApply '$PresetLabel' preset to your profile? [Y/N]"
+                if ($Confirm -ne "Y" -and $Confirm -ne "y") {
+                    Write-Host "[!] Preset selection cancelled - your existing starship.toml was left untouched." -ForegroundColor Yellow
+                    Remove-Item -Path $PreviewFile -Force -ErrorAction SilentlyContinue
+                    Pause-Console
+                    return
+                }
+
+                # Back up any existing user config before overwriting
+                if (Test-Path -Path $StarshipConfigFile) {
+                    $TimeStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+                    $UserBackup = "$StarshipConfigFile.wizard_prewrite_bak_$TimeStamp"
+                    Copy-Item -Path $StarshipConfigFile -Destination $UserBackup -Force -ErrorAction SilentlyContinue
+                    Write-Host "[i] Existing starship.toml backed up to: $UserBackup" -ForegroundColor DarkGray
+                }
+
+                Move-Item -Path $PreviewFile -Destination $StarshipConfigFile -Force
+
+                $Content = Get-Content -Path $StarshipConfigFile -Raw -ErrorAction SilentlyContinue
+                if ([string]::IsNullOrWhiteSpace($Content) -or $Content.Length -lt 50) {
+                    Write-Host "[!] starship.toml looks empty or truncated after write - please re-run this option." -ForegroundColor Red
+                    Pause-Console
+                    return
+                }
+                Write-Host "[OK] '$PresetLabel' preset written and verified." -ForegroundColor Green
+            } else {
+                Write-Host "`n[DRY-RUN] Would preview and write preset '$PresetName' to: $StarshipConfigFile" -ForegroundColor Yellow
             }
 
             $ConfigLines = @(
                 "Import-Module Terminal-Icons -ErrorAction SilentlyContinue",
                 "Import-Module PSReadLine -ErrorAction SilentlyContinue",
                 "Set-PSReadLineOption -PredictionSource History -ErrorAction SilentlyContinue",
-                "Invoke-Expression (&starship init powershell)"
+                "try { if (Get-Command starship -ErrorAction Stop) { Invoke-Expression (&starship init powershell) } } catch { Write-Host '[shell-wizard] Starship failed to load, using default prompt.' -ForegroundColor Yellow }"
             )
 
             Write-ManagedProfile -ConfigLines $ConfigLines
-            Save-ShellWizardState -Engine "Starship" -Theme "Rust Native"
-            Write-Host "[OK] Starship Prompt Engine set as active prompt!" -ForegroundColor Green
+
+            if ($NeedsNerdFont) {
+                $ExactFont = Get-NerdFontFace -ShortName "FiraCode"
+                Set-WindowsTerminalFont -ExactFontName $ExactFont
+            } else {
+                $ExactFont = "Cascadia Mono"
+                Set-WindowsTerminalFont -ExactFontName $ExactFont
+            }
+
+            Save-ShellWizardState -Engine "Starship" -Theme $PresetLabel -Font $ExactFont
+            Write-Host "[OK] Starship Prompt Engine set as active prompt with '$PresetLabel' preset!" -ForegroundColor Green
+            Write-Host "[i] Close and reopen Windows Terminal (or use menu option 8) to see it." -ForegroundColor Cyan
             Pause-Console
         }
         "2" {
@@ -682,8 +883,11 @@ function Standalone-Prompt-Engine {
             )
 
             Write-ManagedProfile -ConfigLines $ConfigLines
-            Save-ShellWizardState -Engine "Posh-Git" -Theme "Git Light"
+            $ExactFont = Get-NerdFontFace -ShortName "JetBrainsMono"
+            Set-WindowsTerminalFont -ExactFontName $ExactFont
+            Save-ShellWizardState -Engine "Posh-Git" -Theme "Git Light" -Font $ExactFont
             Write-Host "[OK] Posh-Git Engine set as active prompt!" -ForegroundColor Green
+            Write-Host "[i] Close and reopen Windows Terminal (or use menu option 8) to see it." -ForegroundColor Cyan
             Pause-Console
         }
         "3" {
@@ -695,8 +899,11 @@ function Standalone-Prompt-Engine {
             )
 
             Write-ManagedProfile -ConfigLines $ConfigLines
-            Save-ShellWizardState -Engine "Native Pure" -Theme "Fast Pure"
+            $ExactFont = Get-NerdFontFace -ShortName "CascadiaCode"
+            Set-WindowsTerminalFont -ExactFontName $ExactFont
+            Save-ShellWizardState -Engine "Native Pure" -Theme "Fast Pure" -Font $ExactFont
             Write-Host "[OK] Native Pure PowerShell Prompt applied!" -ForegroundColor Green
+            Write-Host "[i] Close and reopen Windows Terminal (or use menu option 8) to see it." -ForegroundColor Cyan
             Pause-Console
         }
         "0" { return }
@@ -810,22 +1017,23 @@ function Font-Studio-Engine {
     switch ($FontChoice) {
         "1" {
             Write-Host "`n--> Registering CascadiaCode Nerd Font into Windows..." -ForegroundColor Cyan
-            if (-not $global:ShellWizardDryRun) { oh-my-posh font install CascadiaCode }
+            if (-not $global:ShellWizardDryRun) { if ((Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "CaskaydiaCove NF *" }) { Write-Host "[OK] Font already installed. Skipping." -ForegroundColor Green } else { oh-my-posh font install CascadiaCode } }
             Set-WindowsTerminalFont -ExactFontName "CaskaydiaCove NF"
             Pause-Console
         }
         "2" {
             Write-Host "`n--> Registering JetBrainsMono Nerd Font into Windows..." -ForegroundColor Cyan
-            if (-not $global:ShellWizardDryRun) { oh-my-posh font install JetBrainsMono }
+            if (-not $global:ShellWizardDryRun) { if ((Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "JetBrainsMono NF *" }) { Write-Host "[OK] Font already installed. Skipping." -ForegroundColor Green } else { oh-my-posh font install JetBrainsMono } }
             
-            # Detect exact registered font name dynamically in System Registry/Fonts
-            $InstalledFonts = (Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts").Property
-            $JBFont = $InstalledFonts | Where-Object { $_ -like "*JetBrainsMono*" -or $_ -like "*JetBrains Mono*" } | Select-Object -First 1
+            # Detect exact registered font name in both machine-wide (HKLM) and per-user (HKCU) registry
+            $InstalledFonts = @()
+            $InstalledFonts += (Get-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).Property
+            $InstalledFonts += (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name
 
-            if ($JBFont -like "*NFM*") {
-                $TargetFontName = "JetBrainsMono NFM"
-            } elseif ($JBFont -like "*NF*") {
+            if ($InstalledFonts | Where-Object { $_ -like "JetBrainsMono NF *" }) {
                 $TargetFontName = "JetBrainsMono NF"
+            } elseif ($InstalledFonts | Where-Object { $_ -like "JetBrainsMono NFM *" }) {
+                $TargetFontName = "JetBrainsMono NFM"
             } else {
                 $TargetFontName = "JetBrainsMono Nerd Font"
             }
@@ -835,7 +1043,7 @@ function Font-Studio-Engine {
         }
         "3" {
             Write-Host "`n--> Registering FiraCode Nerd Font into Windows..." -ForegroundColor Cyan
-            if (-not $global:ShellWizardDryRun) { oh-my-posh font install FiraCode }
+            if (-not $global:ShellWizardDryRun) { if ((Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -ErrorAction SilentlyContinue).PSObject.Properties.Name | Where-Object { $_ -like "FiraCode Nerd Font *" }) { Write-Host "[OK] Font already installed. Skipping." -ForegroundColor Green } else { oh-my-posh font install FiraCode } }
             Set-WindowsTerminalFont -ExactFontName "FiraCode Nerd Font"
             Pause-Console
         }
@@ -881,17 +1089,7 @@ function Enable-GlobalCliAccess {
     Pause-Console
 }
 
-# --- Helper mode: wait for Terminal to close, then apply the font ---
-if ($ApplyFontOnly) {
-    $Waited = 0
-    while ((Get-Process -Name WindowsTerminal -ErrorAction SilentlyContinue) -and $Waited -lt 900) {
-        Start-Sleep -Seconds 2
-        $Waited += 2
-    }
-    Start-Sleep -Seconds 2
-    Apply-WindowsTerminalFontNow -ExactFontName $ApplyFontOnly
-    exit
-}
+
 
 # --- Main Application Loop ---
 while ($true) {
@@ -926,6 +1124,7 @@ while ($true) {
             if (Test-Path -Path $PROFILE) {
                 . $PROFILE
                 Write-Host "[OK] PowerShell Profile reloaded successfully!" -ForegroundColor Green
+                Write-Host "[i] Note: font changes need a full Terminal restart (this only re-runs profile commands)." -ForegroundColor Yellow
             } else {
                 Write-Host "[!] No PowerShell Profile found to reload." -ForegroundColor Red
             }
